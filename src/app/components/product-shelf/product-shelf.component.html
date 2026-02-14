@@ -1,0 +1,52 @@
+<div class="product-shelf-container" [class.collapsed]="isCollapsed">
+  <!-- Collapse Toggle Button -->
+  <button class="collapse-toggle" (click)="toggleCollapse()" [title]="isCollapsed ? 'Expand' : 'Collapse'">
+    <svg class="toggle-icon" [class.rotated]="isCollapsed" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
+    </svg>
+  </button>
+
+  <!-- Category Tabs -->
+  <div class="category-tabs" *ngIf="!isCollapsed">
+    <button 
+      *ngFor="let category of categories" 
+      (click)="selectCategory(category)"
+      [class.active]="category === selectedCategory"
+      class="category-tab">
+      {{ getCategoryDisplayName(category) }}
+    </button>
+  </div>
+
+  <!-- Products Carousel -->
+  <div class="product-carousel" *ngIf="!isCollapsed">
+    <div 
+      *ngFor="let product of products" 
+      (click)="applyProduct(product)"
+      [class.applied]="isApplied(product.id)"
+      class="product-card">
+      <div class="product-image">
+        <div class="color-swatch" [style.background-color]="product.colorHex"></div>
+        <div *ngIf="isApplied(product.id)" class="applied-checkmark">
+          <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+          </svg>
+        </div>
+      </div>
+      <div class="product-info">
+        <p class="product-name">{{ product.shade }}</p>
+        <p class="product-brand">{{ product.brand }}</p>
+      </div>
+    </div>
+
+    <!-- Empty state -->
+    <div *ngIf="products.length === 0" class="empty-state">
+      <p>No products in this category</p>
+    </div>
+  </div>
+
+  <!-- Collapsed State Label -->
+  <div class="collapsed-label" *ngIf="isCollapsed">
+    <span class="text-xs font-semibold">{{ getCategoryDisplayName(selectedCategory) }}</span>
+  </div>
+</div>
+

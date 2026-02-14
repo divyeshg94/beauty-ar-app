@@ -1,0 +1,293 @@
+﻿<div class="ar-container">
+  <!-- Loading Overlay -->
+  <div *ngIf="isLoading" class="loading-overlay">
+    <div class="spinner"></div>
+    <p class="mt-4 text-white">Initializing camera...</p>
+  </div>
+
+  <!-- Error Display -->
+  <div *ngIf="cameraError && !isLoading" class="error-overlay">
+    <div class="error-content">
+      <svg class="w-16 h-16 text-red-500 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+      </svg>
+      <h2 class="text-xl font-bold text-white mb-2">Camera Access Required</h2>
+      <p class="text-gray-300 mb-4">{{ cameraError }}</p>
+      <button (click)="initializeCamera()" class="btn-primary">
+        Try Again
+      </button>
+    </div>
+  </div>
+
+  <!-- Video Element -->
+  <video 
+    #videoElement 
+    class="ar-video" 
+    autoplay 
+    playsinline 
+    muted
+    [class.hidden]="isLoading || cameraError">
+  </video>
+
+  <!-- AR Canvas Overlay -->
+  <canvas 
+    #canvasElement 
+    class="ar-canvas"
+    [class.hidden]="isLoading || cameraError">
+  </canvas>
+
+  <!-- Face Detection Indicator -->
+  <div *ngIf="!isLoading && !cameraError" class="face-indicator">
+    <div *ngIf="faceDetected" class="face-detected-badge">
+      <div class="pulse-ring"></div>
+      <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+        <path d="M10 2a8 8 0 100 16 8 8 0 000-16zm0 14a6 6 0 110-12 6 6 0 010 12z"></path>
+        <path d="M10 7a1 1 0 011 1v4a1 1 0 11-2 0V8a1 1 0 011-1z"></path>
+      </svg>
+      <span class="ml-2">Face Detected</span>
+    </div>
+    <div *ngIf="!faceDetected" class="face-not-detected-badge">
+      <svg class="w-6 h-6 animate-pulse" fill="currentColor" viewBox="0 0 20 20">
+        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+      </svg>
+      <span class="ml-2">Position your face</span>
+    </div>
+  </div>
+
+  <!-- Camera Controls -->
+  <div *ngIf="!isLoading && !cameraError" class="camera-controls">
+    <button 
+      *ngIf="hasMultipleCameras"
+      (click)="switchCamera()" 
+      class="control-btn"
+      title="Switch Camera">
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+      </svg>
+    </button>
+
+    <button 
+      (click)="capturePhoto()" 
+      class="capture-btn"
+      title="Capture Photo">
+      <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
+      </svg>
+    </button>
+  </div>
+
+  <!-- Analyze Skin Button -->
+  <button 
+    class="analyze-button"
+    (click)="analyzeSkin()"
+    [disabled]="isAnalyzing">
+    <span *ngIf="!isAnalyzing">📸 Analyze My Skin</span>
+    <span *ngIf="isAnalyzing">⏳ Analyzing...</span>
+  </button>
+
+  <!-- Error Alert -->
+  <div *ngIf="analysisError" class="error-alert">
+    <div class="error-content">
+      <svg class="error-icon" fill="currentColor" viewBox="0 0 20 20">
+        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+      </svg>
+      <div class="error-text">
+        <p class="error-message">{{ analysisError }}</p>
+        <button class="error-close" (click)="clearError()" title="Close">✕</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Skin Analysis Results -->
+  <div *ngIf="skinAnalysis" class="results-panel">
+    <div class="results-header">
+      <h3>✅ Skin Analysis Complete</h3>
+      <button class="close-btn" (click)="clearResults()">✕</button>
+    </div>
+    
+    <div class="skin-tone">
+      <strong>Skin Tone:</strong> {{ skinAnalysis.skinTone.name }}
+      <div class="color-swatch" [style.background-color]="skinAnalysis.skinTone.hex"></div>
+    </div>
+    
+    <div class="undertone">
+      <strong>Undertone:</strong> {{ skinAnalysis.undertone }}
+    </div>
+    
+    <div class="metrics">
+      <div class="metric">
+        <span class="metric-label">Texture Quality</span>
+        <div class="metric-bar">
+          <div class="metric-fill" [style.width.%]="skinAnalysis.texture"></div>
+        </div>
+        <span class="metric-value">{{ skinAnalysis.texture }}%</span>
+      </div>
+      
+      <div class="metric">
+        <span class="metric-label">Hydration Level</span>
+        <div class="metric-bar">
+          <div class="metric-fill" [style.width.%]="skinAnalysis.hydration"></div>
+        </div>
+        <span class="metric-value">{{ skinAnalysis.hydration }}%</span>
+      </div>
+      
+      <div class="metric">
+        <span class="metric-label">Pore Visibility</span>
+        <div class="metric-bar">
+          <div class="metric-fill" [style.width.%]="skinAnalysis.pores"></div>
+        </div>
+        <span class="metric-value">{{ skinAnalysis.pores }}%</span>
+      </div>
+      
+      <div class="metric">
+        <span class="metric-label">Wrinkles</span>
+        <div class="metric-bar">
+          <div class="metric-fill" [style.width.%]="skinAnalysis.wrinkles"></div>
+        </div>
+        <span class="metric-value">{{ skinAnalysis.wrinkles }}%</span>
+      </div>
+    </div>
+    
+  <!-- Skin Analysis Results Modal -->
+  <div *ngIf="skinAnalysis" class="results-modal-overlay" (click)="clearResults()">
+    <div class="results-modal" (click)="$event.stopPropagation()">
+      <!-- Header -->
+      <div class="modal-header">
+        <div class="header-content">
+          <h2>✨ Your Skin Analysis</h2>
+          <p class="subtitle">Complete skin health assessment</p>
+        </div>
+        <button class="close-btn" (click)="clearResults()" title="Close">✕</button>
+      </div>
+
+      <!-- Main Content -->
+      <div class="modal-content">
+        
+        <!-- Overall Score -->
+        <div class="overall-score">
+          <div class="score-circle">
+            <div class="score-value">{{ skinAnalysis.overallScore || 85 }}</div>
+            <div class="score-label">Overall</div>
+          </div>
+          <div class="score-description">
+            <p>Your skin health score based on comprehensive analysis</p>
+          </div>
+        </div>
+
+        <!-- Skin Tone & Age -->
+        <div class="skin-info-grid">
+          <div class="skin-tone-card">
+            <strong>Skin Tone</strong>
+            <p class="tone-name">{{ skinAnalysis.skinTone.name }}</p>
+            <div class="color-swatch" [style.background-color]="skinAnalysis.skinTone.hex"></div>
+          </div>
+          <div class="skin-age-card">
+            <strong>Skin Age</strong>
+            <p class="age-value">{{ skinAnalysis.skinAge || 30 }} years</p>
+            <p class="age-label">Apparent age</p>
+          </div>
+        </div>
+
+        <!-- Analysis Metrics -->
+        <div class="metrics-section">
+          <h3>📊 Skin Metrics</h3>
+          <div class="metrics-grid">
+            
+            <!-- Texture -->
+            <div class="metric-card">
+              <div class="metric-icon">🧴</div>
+              <div class="metric-info">
+                <strong>Texture</strong>
+                <p class="metric-label">Surface smoothness</p>
+              </div>
+              <div class="metric-score">
+                <span class="score">{{ skinAnalysis.texture }}%</span>
+                <div class="progress-bar">
+                  <div class="progress-fill" [style.width.%]="skinAnalysis.texture"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Pores -->
+            <div class="metric-card">
+              <div class="metric-icon">🫧</div>
+              <div class="metric-info">
+                <strong>Pores</strong>
+                <p class="metric-label">Pore visibility</p>
+              </div>
+              <div class="metric-score">
+                <span class="score">{{ skinAnalysis.pores }}%</span>
+                <div class="progress-bar">
+                  <div class="progress-fill" [style.width.%]="skinAnalysis.pores"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Wrinkles -->
+            <div class="metric-card">
+              <div class="metric-icon">✨</div>
+              <div class="metric-info">
+                <strong>Wrinkles</strong>
+                <p class="metric-label">Fine line detection</p>
+              </div>
+              <div class="metric-score">
+                <span class="score">{{ skinAnalysis.wrinkles }}%</span>
+                <div class="progress-bar">
+                  <div class="progress-fill" [style.width.%]="skinAnalysis.wrinkles"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Acne -->
+            <div class="metric-card">
+              <div class="metric-icon">🎯</div>
+              <div class="metric-info">
+                <strong>Acne & Blemishes</strong>
+                <p class="metric-label">Blemish detection</p>
+              </div>
+              <div class="metric-score">
+                <span class="score">{{ skinAnalysis.spots }}%</span>
+                <div class="progress-bar">
+                  <div class="progress-fill" [style.width.%]="skinAnalysis.spots"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Hydration -->
+            <div class="metric-card">
+              <div class="metric-icon">💧</div>
+              <div class="metric-info">
+                <strong>Hydration</strong>
+                <p class="metric-label">Moisture level</p>
+              </div>
+              <div class="metric-score">
+                <span class="score">{{ skinAnalysis.hydration }}%</span>
+                <div class="progress-bar">
+                  <div class="progress-fill" [style.width.%]="skinAnalysis.hydration"></div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Recommendations -->
+        <div class="recommendations-section">
+          <h3>💡 Personalized Recommendations</h3>
+          <ul class="recommendations-list">
+            <li *ngFor="let rec of skinAnalysis.recommendations" class="recommendation-item">
+              {{ rec }}
+            </li>
+          </ul>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="modal-actions">
+          <button class="btn-secondary" (click)="clearResults()">Close</button>
+          <button class="btn-primary" (click)="analyzeSkin()">Analyze Again</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
