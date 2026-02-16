@@ -17,6 +17,9 @@ export class ProductShelfComponent implements OnInit {
   products: Product[] = [];
   appliedProducts: Set<string> = new Set();
   isCollapsed = false;
+  isApplying = false;
+  applyMessage: string | null = null;
+  applyError: string | null = null;
 
   constructor(
     private productService: ProductService,
@@ -45,6 +48,10 @@ export class ProductShelfComponent implements OnInit {
     console.log('Applying product:', product.name);
     
     try {
+      this.isApplying = true;
+      this.applyError = null;
+      this.applyMessage = 'Applying… please wait';
+
       await this.arService.applyMakeup({
         productId: product.id,
         category: product.category,
@@ -63,9 +70,15 @@ export class ProductShelfComponent implements OnInit {
       setTimeout(() => {
         this.appliedProducts.delete(product.id);
       }, 300);
+
+      this.applyMessage = null;
       
     } catch (error) {
       console.error('Failed to apply product:', error);
+      this.applyMessage = null;
+      this.applyError = error instanceof Error ? error.message : String(error);
+    } finally {
+      this.isApplying = false;
     }
   }
 

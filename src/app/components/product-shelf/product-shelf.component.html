@@ -2,7 +2,7 @@
   <!-- Collapse Toggle Button -->
   <button class="collapse-toggle" (click)="toggleCollapse()" [title]="isCollapsed ? 'Expand' : 'Collapse'">
     <svg class="toggle-icon" [class.rotated]="isCollapsed" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
     </svg>
   </button>
 
@@ -19,9 +19,19 @@
 
   <!-- Products Carousel -->
   <div class="product-carousel" *ngIf="!isCollapsed">
+    <div *ngIf="isApplying" class="empty-state">
+      <p>{{ applyMessage || 'In progress…' }}</p>
+    </div>
+
+    <div *ngIf="applyError" class="empty-state" style="color: #fca5a5;">
+      <p>{{ applyError }}</p>
+    </div>
+
     <div 
       *ngFor="let product of products" 
       (click)="applyProduct(product)"
+      [style.pointer-events]="isApplying ? 'none' : 'auto'"
+      [style.opacity]="isApplying ? 0.6 : 1"
       [class.applied]="isApplied(product.id)"
       class="product-card">
       <div class="product-image">
@@ -39,7 +49,7 @@
     </div>
 
     <!-- Empty state -->
-    <div *ngIf="products.length === 0" class="empty-state">
+    <div *ngIf="!isApplying && products.length === 0" class="empty-state">
       <p>No products in this category</p>
     </div>
   </div>

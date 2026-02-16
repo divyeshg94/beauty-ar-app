@@ -47,7 +47,7 @@ import { SkinAnalysis } from '../../models';
   `,
   styles: [`
     .skin-analysis-overlay {
-      @apply absolute top-20 left-4 z-20;
+      @apply absolute top-20 right-4 z-20;
       max-width: 280px;
     }
 

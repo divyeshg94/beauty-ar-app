@@ -1,20 +1,26 @@
 .product-shelf-container {
-  @apply absolute bottom-0 left-0 right-0 bg-gray-900 bg-opacity-95 backdrop-blur-lg pb-4 transition-all duration-300;
-  /* Add safe area padding for devices with notches */
+  @apply absolute top-0 left-0 bottom-0 bg-gray-900 bg-opacity-95 backdrop-blur-lg transition-all duration-300;
+  @apply w-72 max-w-[85vw] border-r border-gray-800;
+  padding-top: max(1rem, env(safe-area-inset-top));
   padding-bottom: max(1rem, env(safe-area-inset-bottom));
+  z-index: 45;
   
   &.collapsed {
-    @apply pb-2;
+    @apply w-14;
     
     .product-carousel,
     .category-tabs {
       @apply hidden;
     }
+
+  &:not(.collapsed) {
+    @apply flex flex-col;
+  }
   }
 }
 
 .collapse-toggle {
-  @apply absolute top-2 right-4 z-50 bg-primary-500 hover:bg-primary-600 text-white rounded-full p-2;
+  @apply absolute top-4 -right-5 z-50 bg-primary-500 hover:bg-primary-600 text-white rounded-full p-2;
   @apply transition-all duration-200 w-10 h-10 flex items-center justify-center shadow-lg;
   
   &:active {
@@ -31,11 +37,14 @@
 }
 
 .collapsed-label {
-  @apply px-4 py-3 text-gray-400;
+  @apply px-2 py-4 text-gray-300;
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
 }
 
 .category-tabs {
-  @apply flex gap-2 px-4 py-2 overflow-x-auto;
+  @apply flex flex-col gap-2 px-3 py-3 overflow-y-auto;
+  max-height: 45vh;
   scrollbar-width: none;
   
   &::-webkit-scrollbar {
@@ -44,7 +53,8 @@
 }
 
 .category-tab {
-  @apply px-4 py-2 text-sm font-medium text-gray-400 whitespace-nowrap rounded-full transition-all duration-200;
+  @apply px-3 py-2 text-sm font-medium text-gray-300 whitespace-nowrap rounded-lg transition-all duration-200;
+  @apply text-left;
   
   &:hover {
     @apply text-white bg-gray-800;
@@ -56,21 +66,39 @@
 }
 
 .product-carousel {
-  @apply flex gap-3 px-4 py-3 overflow-x-auto;
-  scrollbar-width: none;
+  @apply flex flex-col gap-3 px-3 py-3 overflow-y-auto;
+  @apply flex-1 min-h-0;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(156, 163, 175, 0.6) rgba(31, 41, 55, 0.6);
   scroll-behavior: smooth;
   -webkit-overflow-scrolling: touch;
   
   &::-webkit-scrollbar {
-    display: none;
+    width: 10px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: rgba(31, 41, 55, 0.6);
+    border-radius: 999px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: rgba(156, 163, 175, 0.6);
+    border-radius: 999px;
+    border: 2px solid rgba(31, 41, 55, 0.6);
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background: rgba(209, 213, 219, 0.8);
   }
 }
 
 .product-card {
-  @apply flex-shrink-0 w-24 cursor-pointer transition-all duration-200;
+  @apply flex-shrink-0 cursor-pointer transition-all duration-200;
+  @apply flex items-center gap-3 p-2 rounded-lg hover:bg-gray-800;
   
   &:hover {
-    transform: translateY(-4px);
+    transform: translateY(-2px);
   }
   
   &:active {
@@ -104,7 +132,7 @@
 }
 
 .product-image {
-  @apply relative w-24 h-24 rounded-lg overflow-hidden mb-2 shadow-lg;
+  @apply relative w-12 h-12 rounded-lg overflow-hidden shadow-lg;
 }
 
 .color-swatch {
@@ -117,7 +145,7 @@
 }
 
 .product-info {
-  @apply text-center;
+  @apply text-left min-w-0;
 }
 
 .product-name {

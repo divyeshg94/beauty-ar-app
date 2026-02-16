@@ -877,20 +877,16 @@ constructor(private http: HttpClient) {}
           }]
         };
       
-      case 'eye_shadow':
-        return {
-          category: 'eye_shadow',
-          pattern: { name: this.getPatternNameForCategory('eye_shadow', intensity) },
-          palettes: [{
-            color,
-            texture: this.getTextureFromBlend(blend),
-            colorIntensity: intensity,
-            shimmerIntensity: Math.round(intensity * 0.7),
-            shimmerSize: Math.round(intensity * 0.5),
-            shimmerDensity: Math.round(intensity * 0.8),
-            glowIntensity: Math.round(intensity * 0.6)
-          }]
-        };
+       case 'eye_shadow':
+         return {
+           category: 'eye_shadow',
+           pattern: { name: this.getPatternNameForCategory('eye_shadow', intensity) },
+           palettes: [{
+             color,
+             colorIntensity: intensity,
+             texture: this.getTextureFromBlend(blend)
+           }]
+         };
       
       case 'eye_liner':
         return {
@@ -986,7 +982,7 @@ constructor(private http: HttpClient) {}
       'blush': ['2colors1', '2colors2', '2colors3'],
       'bronzer': ['light', 'medium', 'deep'],
       'contour': ['light', 'medium', 'deep'],
-      'eye_shadow': ['matte', 'shimmer', 'metallic'],
+      'eye_shadow': ['2colors1', '2colors2', '2colors3'],
       'eye_liner': ['thin', 'medium', 'thick'],
       'eyebrows': ['thin', 'medium', 'thick'],
       'foundation': ['light', 'medium', 'full'],
