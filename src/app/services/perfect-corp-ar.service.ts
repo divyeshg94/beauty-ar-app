@@ -737,8 +737,8 @@ constructor(private http: HttpClient) {}
         console.log('🖼️ Emitted makeup result URL:', result.url);
       }
 
-      // Update state with result
-      this.updateMakeupState(application);
+      // Update state with result and show popup with image
+      this.updateMakeupState(application, result?.url);
 
       return result;
 
@@ -1066,16 +1066,238 @@ constructor(private http: HttpClient) {}
   }
 
   /**
-   * Update makeup state for tracking applied products
+   * Update makeup state for tracking applied products and show result popup with image
    */
-  private updateMakeupState(application: MakeupApplication): void {
-    // This could be extended to maintain a state of applied makeup products
-    console.log('🎨 Makeup state updated:', {
+  private updateMakeupState(application: MakeupApplication, resultImageUrl?: string): void {
+    const state = {
       category: application.category,
       color: application.color,
       intensity: application.intensity,
+      blend: application.blend || 'natural',
       timestamp: new Date().toISOString()
-    });
+    };
+
+    console.log('🎨 Makeup state updated:', state);
+
+    // Show popup with makeup result and image
+    this.showMakeupResultPopup(state, application, resultImageUrl);
+  }
+
+  /**
+   * Show popup with makeup application result and result image
+   */
+  private showMakeupResultPopup(state: any, application: MakeupApplication, resultImageUrl?: string): void {
+    // Create popup container
+    const popupContainer = document.createElement('div');
+    popupContainer.id = 'makeup-result-popup';
+    popupContainer.style.cssText = `
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 10000;
+      background: linear-gradient(135deg, rgba(30, 30, 40, 0.98) 0%, rgba(40, 40, 50, 0.98) 100%);
+      border: 2px solid rgba(139, 92, 246, 0.4);
+      border-radius: 16px;
+      padding: 2rem;
+      min-width: 320px;
+      max-width: 500px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8), 0 0 30px rgba(139, 92, 246, 0.2);
+      backdrop-filter: blur(10px);
+      animation: popupSlideIn 0.4s cubic-bezier(0.23, 1, 0.320, 1);
+      max-height: 90vh;
+      overflow-y: auto;
+    `;
+
+    // Add animation styles
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes popupSlideIn {
+        from {
+          opacity: 0;
+          transform: translate(-50%, -50%) scale(0.9);
+        }
+        to {
+          opacity: 1;
+          transform: translate(-50%, -50%) scale(1);
+        }
+      }
+      
+      @keyframes popupSlideOut {
+        from {
+          opacity: 1;
+          transform: translate(-50%, -50%) scale(1);
+        }
+        to {
+          opacity: 0;
+          transform: translate(-50%, -50%) scale(0.9);
+        }
+      }
+      
+      #makeup-result-popup.closing {
+        animation: popupSlideOut 0.3s cubic-bezier(0.23, 1, 0.320, 1) forwards;
+      }
+      
+      #makeup-result-image {
+        width: 100%;
+        height: auto;
+        border-radius: 12px;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 8px 24px rgba(139, 92, 246, 0.3);
+        border: 2px solid rgba(139, 92, 246, 0.2);
+      }
+      
+      #makeup-result-image.loading {
+        background: linear-gradient(90deg, rgba(139, 92, 246, 0.1) 25%, rgba(139, 92, 246, 0.2) 50%, rgba(139, 92, 246, 0.1) 75%);
+        background-size: 200% 100%;
+        animation: shimmer 1.5s infinite;
+        height: 300px;
+      }
+      
+      @keyframes shimmer {
+        0% {
+          background-position: 200% 0;
+        }
+        100% {
+          background-position: -200% 0;
+        }
+      }
+    `;
+    document.head.appendChild(style);
+
+    // Popup content
+    const categoryLabel = application.category.charAt(0).toUpperCase() + 
+                          application.category.slice(1).replace('_', ' ');
+    const intensityPercent = Math.round((application.intensity || 0.8) * 100);
+
+    // Build image HTML if URL is available
+    const imageHtml = resultImageUrl ? `
+      <img 
+        id="makeup-result-image"
+        src="${resultImageUrl}" 
+        alt="Makeup Result Image"
+        style="width: 100%; height: auto; border-radius: 12px; margin-bottom: 1.5rem; box-shadow: 0 8px 24px rgba(139, 92, 246, 0.3); border: 2px solid rgba(139, 92, 246, 0.2);"
+        onerror="this.style.display='none'"
+      />
+    ` : '';
+
+    popupContainer.innerHTML = `
+      <div style="color: white; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
+        ${imageHtml}
+        
+        <div style="
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          margin-bottom: 1.5rem;
+          padding-bottom: 1.5rem;
+          border-bottom: 1px solid rgba(139, 92, 246, 0.3);
+        ">
+          <div style="
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            background-color: ${application.color};
+            box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+          "></div>
+          <div>
+            <h3 style="margin: 0 0 4px 0; font-size: 18px; font-weight: 600; color: #e0e0e0;">
+              ✨ ${categoryLabel}
+            </h3>
+            <p style="margin: 0; font-size: 12px; color: rgba(255, 255, 255, 0.6);">
+              Applied Successfully
+            </p>
+          </div>
+        </div>
+        
+        <div style="
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 1rem;
+          margin-bottom: 1.5rem;
+          padding: 1rem;
+          background: rgba(139, 92, 246, 0.08);
+          border-radius: 10px;
+          border: 1px solid rgba(139, 92, 246, 0.2);
+        ">
+          <div>
+            <p style="margin: 0 0 6px 0; font-size: 11px; color: rgba(255, 255, 255, 0.5); text-transform: uppercase; letter-spacing: 0.5px;">
+              Intensity
+            </p>
+            <p style="margin: 0; font-size: 16px; font-weight: 600; color: #a78bfa;">
+              ${intensityPercent}%
+            </p>
+          </div>
+          <div>
+            <p style="margin: 0 0 6px 0; font-size: 11px; color: rgba(255, 255, 255, 0.5); text-transform: uppercase; letter-spacing: 0.5px;">
+              Blend
+            </p>
+            <p style="margin: 0; font-size: 16px; font-weight: 600; color: #a78bfa;">
+              ${(application.blend || 'natural').charAt(0).toUpperCase() + 
+                (application.blend || 'natural').slice(1)}
+            </p>
+          </div>
+        </div>
+
+        <div style="
+          display: flex;
+          gap: 0.75rem;
+        ">
+          <button id="close-popup-btn" style="
+            flex: 1;
+            padding: 10px 16px;
+            background: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 200ms;
+            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+          " onmouseover="this.style.boxShadow='0 6px 20px rgba(139, 92, 246, 0.5)'; this.style.transform='translateY(-2px)';" 
+             onmouseout="this.style.boxShadow='0 4px 12px rgba(139, 92, 246, 0.3)'; this.style.transform='translateY(0)';">
+            Close
+          </button>
+        </div>
+      </div>
+    `;
+
+    // Add popup to DOM
+    document.body.appendChild(popupContainer);
+
+    // Add event listeners
+    const closeBtn = popupContainer.querySelector('#close-popup-btn');
+
+    const closePopup = () => {
+      popupContainer.classList.add('closing');
+      setTimeout(() => {
+        popupContainer.remove();
+      }, 300);
+    };
+
+    if (closeBtn) {
+      closeBtn.addEventListener('click', closePopup);
+    }
+
+    // Auto-close after 12 seconds (longer to view image)
+    setTimeout(() => {
+      if (popupContainer.parentNode) {
+        closePopup();
+      }
+    }, 12000);
+
+    // Close on Escape key
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        closePopup();
+        document.removeEventListener('keydown', handleEscape);
+      }
+    };
+    document.addEventListener('keydown', handleEscape);
+
+    console.log('📱 Makeup result popup displayed with image:', resultImageUrl);
   }
 
   /**
