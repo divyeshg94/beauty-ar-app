@@ -8,14 +8,28 @@
   &.collapsed {
     @apply w-14;
     
-    .product-carousel,
-    .category-tabs {
+    .product-carousel {
       @apply hidden;
     }
 
+    .category-tabs {
+      @apply flex;
+      @apply px-2;
+      max-height: calc(100vh - 90px);
+    }
+
+    .category-tab {
+      @apply px-2 py-2 text-xs;
+      @apply flex items-center justify-center;
+      white-space: normal;
+      writing-mode: vertical-rl;
+      text-orientation: mixed;
+      border-radius: 10px;
+    }
+  }
+
   &:not(.collapsed) {
     @apply flex flex-col;
-  }
   }
 }
 

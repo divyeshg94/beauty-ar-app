@@ -7,7 +7,7 @@
   </button>
 
   <!-- Category Tabs -->
-  <div class="category-tabs" *ngIf="!isCollapsed">
+  <div class="category-tabs">
     <button 
       *ngFor="let category of categories" 
       (click)="selectCategory(category)"
@@ -54,9 +54,6 @@
     </div>
   </div>
 
-  <!-- Collapsed State Label -->
-  <div class="collapsed-label" *ngIf="isCollapsed">
-    <span class="text-xs font-semibold">{{ getCategoryDisplayName(selectedCategory) }}</span>
-  </div>
+  
 </div>
 
