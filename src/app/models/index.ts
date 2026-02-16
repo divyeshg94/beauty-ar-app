@@ -86,11 +86,14 @@ export type ARFeature =
   | 'color_matching';
 
 export interface MakeupApplication {
+  id?: string;
   productId: string;
   category: ProductCategory;
   color: string;
   intensity: number; // 0-1
   blend: 'natural' | 'bold' | 'soft';
+  appliedAt?: Date;
+  isActive?: boolean;
   transition?: {
     duration: number; // ms
     easing: 'linear' | 'ease-in' | 'ease-out' | 'ease-in-out';

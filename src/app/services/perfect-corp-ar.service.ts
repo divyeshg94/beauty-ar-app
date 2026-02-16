@@ -86,6 +86,35 @@ interface YouCamSkinAnalysisResponse {
   };
 }
 
+// YouCam Makeup VTO Response Interfaces
+interface YouCamMakeupVTORequest {
+  src_file_url: string;              // URL of the source image
+  effects: Array<{
+    category: string;                // 'lip_color', 'eye_shadow', 'blush', etc.
+    pattern: {
+      type: string;                  // Pattern type (e.g., 'solid', 'shimmer')
+    };
+    palettes: Array<any>;            // Dynamic palette based on category
+  }>;
+  version: string;                   // API version (e.g., '1.0')
+}
+
+interface YouCamMakeupVTOResponse {
+  status: number;
+  data?: {
+    task_id?: string;
+    result_file_id?: string;
+    result_url?: string;
+    makeup_applied?: boolean;
+    preview_url?: string;
+    image?: string;                  // Base64 result image
+  };
+  error?: {
+    code: string;
+    message: string;
+  };
+}
+
 // Generic API Response (for backwards compatibility)
 interface ApiResponse {
   [key: string]: any;
@@ -100,11 +129,13 @@ export class PerfectCorpArService {
 private arEngine: any = null;
 private faceDataSubject = new BehaviorSubject<FaceData | null>(null);
 private skinAnalysisSubject = new BehaviorSubject<SkinAnalysis | null>(null);
+private makeupResultSubject = new BehaviorSubject<{ url: string } | null>(null);
 private isInitialized = false;
 private hasWarnedAboutRealtime = false; // Flag to show warning only once
 
 public faceData$: Observable<FaceData | null> = this.faceDataSubject.asObservable();
 public skinAnalysis$: Observable<SkinAnalysis | null> = this.skinAnalysisSubject.asObservable();
+public makeupResult$: Observable<{ url: string } | null> = this.makeupResultSubject.asObservable();
 
 private apiBaseUrl = environment.perfectCorpApiUrl;
 private apiKey = environment.perfectCorpApiKey;
@@ -630,44 +661,458 @@ constructor(private http: HttpClient) {}
     }
   }
 
+
   /**
-   * Apply makeup to face using YouCam Makeup API
-   * Endpoint: POST /makeup
-   * Documentation: https://yce.perfectcorp.com/document/index.html#tag/Makeup
-   * NOTE: This returns an image with makeup applied, not real-time AR
+   * Apply makeup to face using YouCam AI Makeup VTO API
+   * Endpoint: POST /makeup-vto or /makeup
+   * Documentation: https://yce.perfectcorp.com/document/index.html#tag/AI-Makeup-Vto
+   * 
+   * The Makeup VTO (Virtual Try-On) API applies cosmetic effects to faces in photos/videos
+   * Supports: lipstick, eyeshadow, blush, eyeliner, mascara, foundation, highlighter
    */
   async applyMakeup(application: MakeupApplication): Promise<void> {
     if (!this.isInitialized) {
       throw new Error('AR Engine not initialized');
     }
 
-    console.log('💄 Applying makeup:', application);
+    console.log('💄 Applying makeup VTO:', application);
 
     try {
-      // YouCam Makeup API expects specific makeup style IDs
-      // For now, log the request - actual implementation needs makeup style IDs from YouCam catalog
-      const payload = {
-        img: application.productId,  // Base64 image
-        makeup_style: application.category,  // Makeup style ID from YouCam catalog
-        intensity: application.intensity
+      // Map product category to YouCam category key
+      const categoryMap: { [key: string]: string } = {
+        'lipstick': 'lip_color',        // ← Use lip_color!
+        'lip_liner': 'lip_liner',
+        'eyeshadow': 'eye_shadow',
+        'eyeliner': 'eye_liner',
+        'eyebrows': 'eyebrows',
+        'eyelashes': 'eyelashes',
+        'blush': 'blush',
+        'bronzer': 'bronzer',
+        'contour': 'contour',
+        'highlighter': 'highlighter',
+        'foundation': 'foundation',
+        'concealer': 'concealer',
+        'skin_smooth': 'skin_smooth'
       };
 
-      console.warn('⚠️ Makeup application requires YouCam makeup style IDs from their catalog');
-      console.log('Payload would be:', payload);
+      const youCamCategory = categoryMap[application.category] || application.category;
+      const intensity = Math.round((application.intensity || 0.8) * 100); // Convert 0-1 to 0-100
 
-      // Uncomment when you have actual makeup style IDs:
-      // await this.http.post(`${this.apiBaseUrl}/makeup`, payload, {
-      //   headers: {
-      //     'X-API-Key': this.apiKey,
-      //     'Content-Type': 'application/json'
-      //   }
-      // }).toPromise();
+      // Create VTO request payload - Correct format for /task/makeup-vto endpoint
+      const effect = this.buildEffectForCategory(youCamCategory, application.color, intensity, application.blend);
 
-      console.log(`✅ Makeup application logged (not yet implemented with real API)`);
+      const vtoPayload: any = {
+        src_file_url: 'https://plugins-media.makeupar.com/strapi/assets/sample_Image_1_202b6bf6e6.jpg',
+        version: '1.0',
+        effects: [effect]
+      };
+
+      console.log('📤 Sending makeup VTO request to /task/makeup-vto:', JSON.stringify(vtoPayload, null, 2));
+
+      // Step 1: Create makeup VTO task
+      const response = await this.http.post<YouCamTaskCreateResponse>(
+        `${this.apiBaseUrl}/task/makeup-vto`,
+        vtoPayload,
+        {
+          headers: {
+            'Authorization': `Bearer ${this.apiKey}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      ).toPromise();
+
+      if (!response?.data?.task_id) {
+        throw new Error('Failed to create makeup VTO task - No task_id in response');
+      }
+
+      console.log('✅ Makeup VTO task created, task_id:', response.data.task_id);
+
+      // Step 2: Poll for makeup VTO result
+      const result = await this.pollMakeupVTOResult(response.data.task_id);
+      console.log('✅ Makeup VTO result received:', result);
+
+      // Emit result to UI
+      if (result?.url) {
+        this.makeupResultSubject.next(result);
+        console.log('🖼️ Emitted makeup result URL:', result.url);
+      }
+
+      // Update state with result
+      this.updateMakeupState(application);
+
+      return result;
+
     } catch (error) {
-      console.error('Failed to apply makeup:', error);
-      this.handleApiError(error, 'Makeup API');
+      console.error('❌ Failed to apply makeup VTO:', error);
+      this.handleApiError(error, 'Makeup VTO API');
+      throw error;
     }
+  }
+
+  /**
+   * Poll makeup VTO task status until completion
+   */
+  private async pollMakeupVTOResult(taskId: string, maxAttempts: number = 60): Promise<any> {
+    console.log('⏳ Starting to poll makeup VTO result...');
+    console.log('🆔 Task ID:', taskId);
+    console.log('⏱️ Max attempts:', maxAttempts);
+    
+    for (let attempt = 0; attempt < maxAttempts; attempt++) {
+      const elapsedSeconds = attempt * 1;
+      const progress = Math.round((attempt / maxAttempts) * 100);
+      console.log(`🔄 Poll attempt ${attempt + 1}/${maxAttempts} (${elapsedSeconds}s elapsed, ${progress}%)...`);
+      
+      try {
+        const response = await this.http.get<YouCamTaskStatusResponse>(
+          `${this.apiBaseUrl}/task/makeup-vto/${taskId}`,
+          {
+            headers: {
+              'Authorization': `Bearer ${this.apiKey}`,
+              'Content-Type': 'application/json'
+            }
+          }
+        ).toPromise();
+
+        if (!response) {
+          throw new Error('No response from makeup VTO status endpoint');
+        }
+
+        console.log(`📊 Poll response (attempt ${attempt + 1}):`, {
+          task_status: response.data?.task_status,
+          status: response.data?.status,
+          has_error: !!response.data?.error
+        });
+
+        // Check if there's an error in the response
+        if (response.data?.error) {
+          console.error('❌ Task returned error:', response.data.error);
+          throw new StopPollingError(response.data.error);
+        }
+
+        // Check for success status
+        if (response.data?.task_status === 'success') {
+          console.log('✅ Makeup VTO task completed! Results:', response.data.results || response.data.result);
+          return response.data.results || response.data.result;
+        }
+
+        if (response.data?.status === 'completed') {
+          console.log('✅ Makeup VTO task completed! Results:', response.data.result);
+          return response.data.result;
+        }
+
+        // Check for failed status
+        if (response.data?.task_status === 'failed' || response.data?.status === 'failed') {
+          throw new StopPollingError(`Makeup VTO task failed: ${response.data.error || 'Unknown error'}`);
+        }
+
+        // Still running - keep polling
+        if (response.data?.task_status === 'running' || response.data?.status === 'running') {
+          console.log(`⏳ Makeup VTO task still running... (attempt ${attempt + 1}/${maxAttempts})`);
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          continue;
+        }
+
+        // Unknown status - keep polling
+        console.warn(`⚠️ Unknown task status: ${response.data?.task_status || response.data?.status}`);
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+      } catch (error: any) {
+        if (error instanceof StopPollingError) {
+          console.error('🛑 Stopping poll due to error:', error.message);
+          throw error;
+        }
+
+        console.error(`❌ Poll attempt ${attempt + 1} failed:`, error);
+        if (attempt === maxAttempts - 1) {
+          throw new Error(`Failed to get makeup VTO result after ${maxAttempts} attempts`);
+        }
+
+        // Wait before retrying
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      }
+    }
+
+    throw new Error(`Makeup VTO task did not complete within ${maxAttempts} seconds`);
+  }
+
+  /**
+   * Build effect object with category-specific structure
+   */
+  private buildEffectForCategory(category: string, color: string, intensity: number, blend: string = 'natural'): any {
+    switch(category) {
+      case 'skin_smooth':
+        return {
+          category: 'skin_smooth',
+          skinSmoothStrength: Math.round(intensity * 0.55),
+          skinSmoothColorIntensity: Math.round(intensity * 0.45)
+        };
+      
+      case 'lip_color':
+        return {
+          category: 'lip_color',
+          shape: { name: 'plump' },
+          morphology: { fullness: 30, wrinkless: 25 },
+          style: { type: 'full' },
+          palettes: [{
+            color,
+            texture: this.getTextureFromBlend(blend),
+            colorIntensity: intensity,
+            gloss: Math.round(intensity * 0.93)
+          }]
+        };
+      
+      case 'blush':
+      case 'bronzer':
+      case 'contour':
+        return {
+          category,
+          pattern: { name: this.getPatternNameForCategory(category, intensity) },
+          palettes: [{
+            color,
+            texture: this.getTextureFromBlend(blend),
+            colorIntensity: intensity,
+            shimmerColor: this.getLighterColor(color),
+            shimmerDensity: Math.round(intensity * 0.6),
+            glowStrength: Math.round(intensity * 0.4)
+          }]
+        };
+      
+      case 'eye_shadow':
+        return {
+          category: 'eye_shadow',
+          pattern: { name: this.getPatternNameForCategory('eye_shadow', intensity) },
+          palettes: [{
+            color,
+            texture: this.getTextureFromBlend(blend),
+            colorIntensity: intensity,
+            shimmerIntensity: Math.round(intensity * 0.7),
+            shimmerSize: Math.round(intensity * 0.5),
+            shimmerDensity: Math.round(intensity * 0.8),
+            glowIntensity: Math.round(intensity * 0.6)
+          }]
+        };
+      
+      case 'eye_liner':
+        return {
+          category: 'eye_liner',
+          pattern: { name: this.getPatternNameForCategory('eye_liner', intensity) },
+          palettes: [{
+            color,
+            texture: this.getTextureFromBlend(blend),
+            colorIntensity: intensity,
+            colorUnderEyeIntensity: Math.round(intensity * 0.5),
+            coverageLevel: Math.round(intensity * 0.8)
+          }]
+        };
+      
+      case 'eyebrows':
+        return {
+          category: 'eyebrows',
+          pattern: { name: this.getPatternNameForCategory('eyebrows', intensity) },
+          palettes: [{
+            color,
+            texture: this.getTextureFromBlend(blend),
+            colorIntensity: intensity,
+            smoothness: Math.round(intensity * 0.6),
+            thickness: Math.round(intensity * 0.7)
+          }]
+        };
+      
+      case 'foundation':
+      case 'concealer':
+        return {
+          category,
+          pattern: { name: this.getPatternNameForCategory(category, intensity) },
+          palettes: [{
+            color,
+            texture: this.getTextureFromBlend(blend),
+            colorIntensity: intensity,
+            coverageIntensity: Math.round(intensity * 0.9),
+            coverageLevel: Math.round(intensity * 0.8)
+          }]
+        };
+      
+      case 'highlighter':
+        return {
+          category: 'highlighter',
+          pattern: { name: this.getPatternNameForCategory('highlighter', intensity) },
+          palettes: [{
+            color,
+            texture: this.getTextureFromBlend(blend),
+            colorIntensity: intensity,
+            glowIntensity: Math.round(intensity * 0.8),
+            gloss: Math.round(intensity * 0.7)
+          }]
+        };
+      
+      case 'eyelashes':
+        return {
+          category: 'eyelashes',
+          pattern: { name: this.getPatternNameForCategory('eyelashes', intensity) },
+          palettes: [{
+            colorIntensity: intensity,
+            thickness: Math.round(intensity * 0.8),
+            curl: Math.round(intensity * 0.7)
+          }]
+        };
+      
+      case 'lip_liner':
+        return {
+          category: 'lip_liner',
+          pattern: { name: this.getPatternNameForCategory('lip_liner', intensity) },
+          palettes: [{
+            color,
+            texture: this.getTextureFromBlend(blend),
+            colorIntensity: intensity
+          }]
+        };
+      
+      default:
+        return {
+          category,
+          palettes: [{
+            color,
+            colorIntensity: intensity
+          }]
+        };
+    }
+  }
+
+  /**
+   * Get pattern name based on category and intensity
+   */
+  private getPatternNameForCategory(category: string, intensity: number): string {
+    const patterns: { [key: string]: string[] } = {
+      'blush': ['2colors1', '2colors2', '2colors3'],
+      'bronzer': ['light', 'medium', 'deep'],
+      'contour': ['light', 'medium', 'deep'],
+      'eye_shadow': ['matte', 'shimmer', 'metallic'],
+      'eye_liner': ['thin', 'medium', 'thick'],
+      'eyebrows': ['thin', 'medium', 'thick'],
+      'foundation': ['light', 'medium', 'full'],
+      'concealer': ['light', 'medium', 'full'],
+      'highlighter': ['natural', 'intense', 'glowing'],
+      'eyelashes': ['natural', 'volumizing', 'lengthening'],
+      'lip_liner': ['thin', 'medium', 'thick']
+    };
+
+    const categoryPatterns = patterns[category] || ['default'];
+    
+    if (intensity < 40) {
+      return categoryPatterns[0];
+    } else if (intensity < 70) {
+      return categoryPatterns[Math.floor(categoryPatterns.length / 2)];
+    } else {
+      return categoryPatterns[categoryPatterns.length - 1];
+    }
+  }
+
+  /**
+   * Map blend mode to texture type
+   */
+  private getTextureFromBlend(blend: string): string {
+    const textureMap: { [key: string]: string } = {
+      'natural': 'matte',
+      'bold': 'gloss',
+      'soft': 'satin'
+    };
+    return textureMap[blend] || 'matte';
+  }
+
+  /**
+   * Get lip shape based on intensity
+   */
+  private getShapeForIntensity(intensity: number): string {
+    // Valid shape names for lip_color - adjust based on actual API values
+    // Try different shape values if these don't work
+    if (intensity < 40) return 'standard';
+    if (intensity < 70) return 'plump';
+    return 'plump';  // Use plump for high intensity as well
+  }
+
+  /**
+   * Get lighter shade of color for shimmer
+   */
+  private getLighterColor(color: string): string {
+    // Simple implementation - just return a lighter version
+    // In production, you could use a color library
+    return color; // Placeholder
+  }
+
+  /**
+   * Generate a preview data URL for makeup (for demo purposes)
+   */
+  private generateMakeupPreviewDataUrl(application: MakeupApplication): string {
+    // Create a simple visual preview using canvas
+    const canvas = document.createElement('canvas');
+    canvas.width = 200;
+    canvas.height = 200;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return '';
+
+    // Background
+    ctx.fillStyle = application.color;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Add product info
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 16px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText(application.category.toUpperCase(), canvas.width / 2, 100);
+    ctx.font = '12px Arial';
+    ctx.fillText(`Intensity: ${(application.intensity * 100).toFixed(0)}%`, canvas.width / 2, 130);
+
+    return canvas.toDataURL('image/png');
+  }
+
+  /**
+   * Update makeup state for tracking applied products
+   */
+  private updateMakeupState(application: MakeupApplication): void {
+    // This could be extended to maintain a state of applied makeup products
+    console.log('🎨 Makeup state updated:', {
+      category: application.category,
+      color: application.color,
+      intensity: application.intensity,
+      timestamp: new Date().toISOString()
+    });
+  }
+
+  /**
+   * Get makeup recommendations based on skin analysis
+   */
+  getMakeupRecommendations(skinAnalysis: SkinAnalysis): any {
+    const recommendations: any = {};
+
+    // Recommend colors based on skin tone
+    if (skinAnalysis.skinTone.category === 'very-light') {
+      recommendations.lipstick = ['#FFB6C1', '#FF69B4', '#DB7093']; // Light pink/magenta
+      recommendations.eyeshadow = ['#FFE4E1', '#FFB6C1', '#DDA0DD'];
+    } else if (skinAnalysis.skinTone.category === 'light') {
+      recommendations.lipstick = ['#FF1493', '#FF69B4', '#C71585'];
+      recommendations.eyeshadow = ['#DA70D6', '#EE82EE', '#DDA0DD'];
+    } else if (skinAnalysis.skinTone.category === 'medium') {
+      recommendations.lipstick = ['#C71585', '#8B008B', '#FF1493'];
+      recommendations.eyeshadow = ['#9932CC', '#8B008B', '#4B0082'];
+    } else if (skinAnalysis.skinTone.category === 'tan') {
+      recommendations.lipstick = ['#FF6347', '#CD5C5C', '#DC143C'];
+      recommendations.eyeshadow = ['#FF8C00', '#FFA500', '#FFB347'];
+    } else {
+      // Deep skin tone
+      recommendations.lipstick = ['#FF6B35', '#D2691E', '#8B4513'];
+      recommendations.eyeshadow = ['#FFD700', '#FFA500', '#FF8C00'];
+    }
+
+    // Recommend blush based on undertone
+    if (skinAnalysis.undertone === 'warm') {
+      recommendations.blush = ['#FF7F50', '#FF6347', '#FFB347'];
+    } else if (skinAnalysis.undertone === 'cool') {
+      recommendations.blush = ['#FF69B4', '#FFB6C1', '#FF1493'];
+    } else {
+      recommendations.blush = ['#FFA07A', '#FF8C69', '#FF6347'];
+    }
+
+    return recommendations;
   }
 
   /**
@@ -1008,6 +1453,8 @@ constructor(private http: HttpClient) {}
    */
   clearMakeup(): void {
     console.log('🧹 Clearing all makeup');
+    this.makeupResultSubject.next(null);
+    console.log('✨ Cleared makeup result');
     // Clear AR effects - in production, call API to reset
   }
 

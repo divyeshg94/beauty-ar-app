@@ -4,7 +4,6 @@ import { ArCameraComponent } from './components/ar-camera/ar-camera.component';
 import { ProductShelfComponent } from './components/product-shelf/product-shelf.component';
 import { SkinAnalysisOverlayComponent } from './components/skin-analysis-overlay/skin-analysis-overlay.component';
 import { AiLookGeneratorComponent } from './components/ai-look-generator/ai-look-generator.component';
-import { ActionBarComponent } from './components/action-bar/action-bar.component';
 
 @Component({
   selector: 'app-root',
@@ -14,8 +13,7 @@ import { ActionBarComponent } from './components/action-bar/action-bar.component
     ArCameraComponent,
     ProductShelfComponent,
     SkinAnalysisOverlayComponent,
-    AiLookGeneratorComponent,
-    ActionBarComponent
+    AiLookGeneratorComponent
   ],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss']

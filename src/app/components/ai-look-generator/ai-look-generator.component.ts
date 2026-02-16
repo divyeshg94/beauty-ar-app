@@ -66,7 +66,7 @@ import { GeneratedLook } from '../../models';
     }
 
     .generator-panel {
-      @apply absolute bottom-full right-0 mb-2 w-80 max-w-[calc(100vw-2rem)] floating-overlay text-white;
+      @apply absolute bottom-full right-0 mb-2 w-80 max-w-[calc(100vw-2rem)] bg-gray-800 rounded-lg shadow-2xl border border-gray-700 p-4 text-white;
       animation: slideUp 0.3s ease-out;
     }
 
@@ -91,7 +91,7 @@ import { GeneratedLook } from '../../models';
     }
 
     .generate-btn {
-      @apply w-full btn-primary disabled:opacity-50 disabled:cursor-not-allowed;
+      @apply w-full bg-primary-500 hover:bg-primary-600 text-white font-semibold py-2 px-4 rounded-lg transition-all duration-300 transform hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed;
     }
 
     .spinner-sm {
@@ -115,7 +115,7 @@ import { GeneratedLook } from '../../models';
     }
 
     .apply-btn {
-      @apply w-full btn-primary;
+      @apply w-full bg-primary-500 hover:bg-primary-600 text-white font-semibold py-2 px-4 rounded-lg transition-all duration-300 transform hover:scale-105 active:scale-95;
     }
   `]
 })

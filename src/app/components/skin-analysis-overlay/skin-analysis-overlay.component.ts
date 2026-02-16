@@ -52,7 +52,7 @@ import { SkinAnalysis } from '../../models';
     }
 
     .analysis-card {
-      @apply floating-overlay text-white;
+      @apply bg-gray-800 rounded-lg shadow-2xl border border-gray-700 p-4 text-white;
     }
 
     .metric {
