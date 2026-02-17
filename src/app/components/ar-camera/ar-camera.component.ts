@@ -48,6 +48,9 @@ constructor(
         throw new Error('Failed to initialize AR engine');
       }
 
+      // Allow the AR service to capture frames from the active camera element (for Makeup VTO)
+      this.arService.registerVideoElementProvider(() => this.videoElement?.nativeElement ?? null);
+
       // Start camera
       const stream = await this.cameraService.startCamera();
       

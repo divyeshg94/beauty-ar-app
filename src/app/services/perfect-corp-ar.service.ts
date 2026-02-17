@@ -132,6 +132,7 @@ private skinAnalysisSubject = new BehaviorSubject<SkinAnalysis | null>(null);
 private makeupResultSubject = new BehaviorSubject<{ url: string } | null>(null);
 private isInitialized = false;
 private hasWarnedAboutRealtime = false; // Flag to show warning only once
+private videoElementProvider: (() => HTMLVideoElement | null) | null = null;
 
 public faceData$: Observable<FaceData | null> = this.faceDataSubject.asObservable();
 public skinAnalysis$: Observable<SkinAnalysis | null> = this.skinAnalysisSubject.asObservable();
@@ -141,6 +142,66 @@ private apiBaseUrl = environment.perfectCorpApiUrl;
 private apiKey = environment.perfectCorpApiKey;
 
 constructor(private http: HttpClient) {}
+
+  /**
+   * Request upload URL for the Makeup VTO flow.
+   * Uses the Makeup VTO file endpoint so the resulting file can be fetched by /task/makeup-vto.
+   */
+  private async requestMakeupVtoFileUpload(imageBase64: string): Promise<{ file_id: string; upload_url: string; headers: any }> {
+    const byteString = atob(imageBase64);
+    const byteArray = new Uint8Array(byteString.length);
+    for (let i = 0; i < byteString.length; i++) {
+      byteArray[i] = byteString.charCodeAt(i);
+    }
+    const blob = new Blob([byteArray], { type: 'image/jpeg' });
+
+    const payload = {
+      files: [
+        {
+          content_type: 'image/jpeg',
+          file_name: `makeup_${Date.now()}.jpg`,
+          file_size: blob.size
+        }
+      ]
+    };
+
+    const response = await this.http.post<any>(
+      `${this.apiBaseUrl}/file/makeup-vto`,
+      payload,
+      {
+        headers: {
+          'Authorization': `Bearer ${this.apiKey}`,
+          'Content-Type': 'application/json'
+        }
+      }
+    ).toPromise();
+
+    const fileData = response?.data?.files?.[0];
+    const uploadRequest = fileData?.requests?.[0];
+    if (!fileData?.file_id || !uploadRequest?.url) {
+      throw new Error('Invalid response structure from /file/makeup-vto');
+    }
+
+    return {
+      file_id: fileData.file_id,
+      upload_url: uploadRequest.url,
+      headers: uploadRequest.headers || {}
+    };
+  }
+
+  private async uploadCameraFrameAndGetFileId(imageBase64: string): Promise<string> {
+    const uploadInfo = await this.requestMakeupVtoFileUpload(imageBase64);
+    await this.uploadImageToS3(imageBase64, { url: uploadInfo.upload_url, headers: uploadInfo.headers });
+    return uploadInfo.file_id;
+  }
+
+  /**
+   * Register a provider that returns the active camera video element.
+   * Used to capture the current frame for Makeup VTO.
+   */
+  registerVideoElementProvider(provider: () => HTMLVideoElement | null): void {
+    this.videoElementProvider = provider;
+  }
 
   /**
    * Initialize the Perfect Corp AR Engine
@@ -670,7 +731,7 @@ constructor(private http: HttpClient) {}
    * The Makeup VTO (Virtual Try-On) API applies cosmetic effects to faces in photos/videos
    * Supports: lipstick, eyeshadow, blush, eyeliner, mascara, foundation, highlighter
    */
-  async applyMakeup(application: MakeupApplication): Promise<void> {
+  async applyMakeup(application: MakeupApplication, cameraFrameBase64?: string): Promise<void> {
     if (!this.isInitialized) {
       throw new Error('AR Engine not initialized');
     }
@@ -678,7 +739,15 @@ constructor(private http: HttpClient) {}
     console.log('💄 Applying makeup VTO:', application);
 
     try {
-      // Map product category to YouCam category key
+      // If no frame is provided, capture from the registered AR camera video element
+      if (!cameraFrameBase64 && this.videoElementProvider) {
+        const videoEl = this.videoElementProvider();
+        if (videoEl) {
+          cameraFrameBase64 = this.captureFrameAsBase64(videoEl);
+        }
+      }
+
+      // Map product category to YouCam category key (MUST use exact enum values)
       const categoryMap: { [key: string]: string } = {
         'lipstick': 'lip_color',        // ← Use lip_color!
         'lip_liner': 'lip_liner',
@@ -698,14 +767,30 @@ constructor(private http: HttpClient) {}
       const youCamCategory = categoryMap[application.category] || application.category;
       const intensity = Math.round((application.intensity || 0.8) * 100); // Convert 0-1 to 0-100
 
+      // Upload the current frame (or fall back to YouCam sample image)
+      let srcFileId: string | null = null;
+      let srcFileUrl: string | null = null;
+      if (cameraFrameBase64) {
+        srcFileId = await this.uploadCameraFrameAndGetFileId(cameraFrameBase64);
+      } else {
+        srcFileUrl = 'https://plugins-media.makeupar.com/strapi/assets/sample_Image_1_202b6bf6e6.jpg';
+      }
+
       // Create VTO request payload - Correct format for /task/makeup-vto endpoint
       const effect = this.buildEffectForCategory(youCamCategory, application.color, intensity, application.blend);
 
       const vtoPayload: any = {
-        src_file_url: 'https://plugins-media.makeupar.com/strapi/assets/sample_Image_1_202b6bf6e6.jpg',
         version: '1.0',
         effects: [effect]
       };
+
+      if (srcFileId) {
+        vtoPayload.src_file_id = srcFileId;
+      } else if (srcFileUrl) {
+        vtoPayload.src_file_url = srcFileUrl;
+      } else {
+        throw new Error('No source file provided for makeup VTO');
+      }
 
       console.log('📤 Sending makeup VTO request to /task/makeup-vto:', JSON.stringify(vtoPayload, null, 2));
 
