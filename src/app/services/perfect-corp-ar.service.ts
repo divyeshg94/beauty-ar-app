@@ -1590,7 +1590,7 @@ constructor(private http: HttpClient) {}
     }
 
     // Acne recommendations
-    if (scores.acne < 90) {
+    if (scores.acne < 80) {
       recommendations.push('🎯 Use targeted acne treatment products');
     }
 

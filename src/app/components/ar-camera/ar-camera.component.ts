@@ -108,11 +108,26 @@ constructor(
   }
 
   capturePhoto() {
-    if (this.videoElement) {
-      const dataUrl = this.cameraService.capturePhoto(this.videoElement.nativeElement);
-      console.log('📷 Photo captured:', dataUrl);
-      // Implement photo saving/sharing functionality here
-    }
+    if (!this.videoElement?.nativeElement) return;
+
+    const dataUrl = this.cameraService.capturePhoto(this.videoElement.nativeElement);
+    if (!dataUrl) return;
+
+    const fileName = `ar-photo-${new Date().toISOString().replace(/[:.]/g, '-')}.png`;
+    this.downloadDataUrl(dataUrl, fileName);
+
+    console.log('📷 Photo saved to downloads:', fileName);
+  }
+
+  private downloadDataUrl(dataUrl: string, fileName: string) {
+    const a = document.createElement('a');
+    a.href = dataUrl;
+    a.download = fileName;
+    a.rel = 'noopener';
+    a.style.display = 'none';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
   }
 
   async analyzeSkin() {

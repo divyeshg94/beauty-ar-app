@@ -36,7 +36,43 @@
 }
 
 .camera-controls {
-  @apply absolute bottom-5 left-0 right-0 flex items-center justify-center gap-4 z-30 px-4;
+  @apply hidden;
+}
+
+.action-row {
+  @apply fixed bottom-9 left-1/2 transform -translate-x-1/2 z-40;
+  @apply flex items-center gap-3 px-3 py-2;
+  @apply bg-gray-900 bg-opacity-60 backdrop-blur-md rounded-full shadow-2xl;
+  max-width: calc(100vw - 1.5rem);
+}
+
+.action-btn {
+  @apply px-4 py-2 text-sm font-semibold text-white rounded-full;
+  @apply transition-all duration-200;
+  @apply hover:scale-105 active:scale-95;
+  @apply focus:outline-none focus:ring-2 focus:ring-primary-400;
+
+  &.analyze {
+    @apply bg-gradient-to-r from-pink-500 to-purple-600;
+    @apply hover:from-pink-600 hover:to-purple-700;
+    @apply disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  &.capture {
+    @apply bg-primary-500 bg-opacity-90;
+    @apply hover:bg-primary-600;
+  }
+
+  &.looks {
+    @apply bg-gray-800 bg-opacity-80;
+    @apply hover:bg-gray-700;
+  }
+
+  &.switch {
+    @apply bg-gray-800 bg-opacity-80;
+    @apply hover:bg-gray-700;
+    @apply px-3;
+  }
 }
 
 .control-btn {
@@ -71,11 +107,7 @@
 
 // Analyze Button Styling
 .analyze-button {
-  @apply fixed bottom-32 left-1/2 transform -translate-x-1/2 z-40;
-  @apply px-8 py-4 bg-gradient-to-r from-pink-500 to-purple-600 text-white font-bold rounded-full shadow-2xl;
-  @apply hover:from-pink-600 hover:to-purple-700 transition-all duration-300;
-  @apply disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:from-pink-500 disabled:hover:to-purple-600;
-  animation: pulse-button 2s ease-in-out infinite;
+  @apply hidden;
   
   &:not(:disabled):hover {
     transform: translate(-50%, -2px) scale(1.05);
