@@ -18,6 +18,16 @@
 - 🎭 Multi-select product application across categories
 
 ---
+## Sample Screenshots
+
+<img width="1852" height="1012" alt="image" src="https://github.com/user-attachments/assets/35fc37ff-5e3c-4956-9b48-28fde83871ac" />
+<img width="1852" height="1012" alt="image" src="https://github.com/user-attachments/assets/35fc37ff-5e3c-4956-9b48-28fde83871ac" />
+
+<img width="1850" height="1017" alt="image" src="https://github.com/user-attachments/assets/1e45cf6a-49b1-40d9-a484-d23f4bf71ec5" />
+<img width="1850" height="1017" alt="image" src="https://github.com/user-attachments/assets/1e45cf6a-49b1-40d9-a484-d23f4bf71ec5" />
+
+
+---
 
 ## 🔗 Perfect Corp APIs Used
 
@@ -506,7 +516,7 @@ This project was created for the **DeveloperWeek Hackathon 2026** as a demonstra
 ## 📞 Support
 
 For issues, questions, or suggestions:
-- 📧 Email: [your-email@example.com]
+- 📧 Email: [divyeshgovardhanan@gmail.com]
 - 🐙 GitHub Issues: [Create an issue](https://github.com/divyeshg94/beauty-ar-app/issues)
 - 💬 Discussions: [Start a discussion](https://github.com/divyeshg94/beauty-ar-app/discussions)
 
