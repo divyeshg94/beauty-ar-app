@@ -21,6 +21,16 @@ import { SkinAnalysis } from '../../models';
         </div>
 
         <div class="metric">
+          <span class="metric-label">Tone Category:</span>
+          <span class="metric-value">{{ skinAnalysis.skinTone.category }}</span>
+        </div>
+
+        <div class="metric">
+          <span class="metric-label">Undertone:</span>
+          <span class="metric-value">{{ skinAnalysis.undertone }}</span>
+        </div>
+
+        <div class="metric">
           <span class="metric-label">Hydration:</span>
           <div class="progress-bar">
             <div class="progress-fill" [style.width.%]="skinAnalysis.hydration"></div>

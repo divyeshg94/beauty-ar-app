@@ -18,6 +18,30 @@ class StopPollingError extends Error {
   }
 }
 
+interface YouCamSkinToneTaskCreateResponse {
+  status: number;
+  data: {
+    task_id: string;
+  };
+}
+
+interface YouCamSkinToneTaskStatusResponse {
+  status: number;
+  data: {
+    task_status?: 'running' | 'success' | 'failed' | 'error';
+    status?: 'running' | 'completed' | 'failed';
+    result?: {
+      skin_tone?: SkinToneResult;
+      skin_type?: SkinTypeResult;
+      error?: string;
+      code?: string;
+      message?: string;
+    };
+    results?: any;
+    error?: string | null;
+  };
+}
+
 // YouCam API Response Interfaces
 interface SkinToneResult {
   color: string;
@@ -753,6 +777,7 @@ constructor(private http: HttpClient) {}
         'lip_liner': 'lip_liner',
         'eyeshadow': 'eye_shadow',
         'eyeliner': 'eye_liner',
+        'mascara': 'eyelashes',
         'eyebrows': 'eyebrows',
         'eyelashes': 'eyelashes',
         'blush': 'blush',
@@ -1000,10 +1025,20 @@ constructor(private http: HttpClient) {}
         };
       
       case 'foundation':
+        return {
+          category: 'foundation',
+          palettes: [{
+            color,
+            colorIntensity: intensity,
+            glowIntensity: Math.round(intensity * 0.5),
+            coverageIntensity: Math.round(intensity * 0.9)
+          }]
+        };
+      
       case 'concealer':
         return {
-          category,
-          pattern: { name: this.getPatternNameForCategory(category, intensity) },
+          category: 'concealer',
+          pattern: { type: this.getPatternNameForCategory('concealer', intensity) },
           palettes: [{
             color,
             texture: this.getTextureFromBlend(blend),
@@ -1019,17 +1054,18 @@ constructor(private http: HttpClient) {}
           pattern: { name: this.getPatternNameForCategory('highlighter', intensity) },
           palettes: [{
             color,
-            texture: this.getTextureFromBlend(blend),
-            colorIntensity: intensity,
             glowIntensity: Math.round(intensity * 0.8),
-            gloss: Math.round(intensity * 0.7)
+            shimmerIntensity: Math.round(intensity * 0.75),
+            shimmerDensity: Math.round(intensity * 0.6),
+            shimmerSize: Math.round(intensity * 0.7),
+            colorIntensity: intensity
           }]
         };
       
       case 'eyelashes':
         return {
           category: 'eyelashes',
-          pattern: { name: this.getPatternNameForCategory('eyelashes', intensity) },
+          pattern: { type: this.getPatternNameForCategory('eyelashes', intensity) },
           palettes: [{
             colorIntensity: intensity,
             thickness: Math.round(intensity * 0.8),
@@ -1040,7 +1076,7 @@ constructor(private http: HttpClient) {}
       case 'lip_liner':
         return {
           category: 'lip_liner',
-          pattern: { name: this.getPatternNameForCategory('lip_liner', intensity) },
+          pattern: { type: this.getPatternNameForCategory('lip_liner', intensity) },
           palettes: [{
             color,
             texture: this.getTextureFromBlend(blend),
@@ -1068,11 +1104,11 @@ constructor(private http: HttpClient) {}
       'bronzer': ['light', 'medium', 'deep'],
       'contour': ['light', 'medium', 'deep'],
       'eye_shadow': ['2colors1', '2colors2', '2colors3'],
-      'eye_liner': ['thin', 'medium', 'thick'],
+      'eye_liner': ['3colors1', '3colors3', '3colors5'],
       'eyebrows': ['thin', 'medium', 'thick'],
       'foundation': ['light', 'medium', 'full'],
       'concealer': ['light', 'medium', 'full'],
-      'highlighter': ['natural', 'intense', 'glowing'],
+      'highlighter': ['OvalFace2', 'OvalFace4', 'OvalFace5', 'OvalFace9', 'OvalFace15', 'OvalFace17'],
       'eyelashes': ['natural', 'volumizing', 'lengthening'],
       'lip_liner': ['thin', 'medium', 'thick']
     };
@@ -1643,22 +1679,39 @@ constructor(private http: HttpClient) {}
    */
   async analyzeSkinTone(imageBase64: string): Promise<{ hex: string; name: string; category: string } | null> {
     try {
-      // Use the full analysis and extract just skin tone
-      const analysis = await this.analyzePhotoForSkin(imageBase64);
-      
-      if (analysis && analysis.skinTone) {
-        return {
-          hex: analysis.skinTone.hex,
-          name: analysis.skinTone.name,
-          category: analysis.skinTone.category
-        };
-      }
+        const result = await this.callSkinAnalysisApi(imageBase64);
+        const tone = result?.result?.skin_tone;
+      if (!tone?.color) return null;
 
-      return null;
+      return {
+        hex: tone.color,
+        name: tone.label || 'Skin Tone',
+        category: this.mapSkinToneCategory(tone.label)
+      };
     } catch (error) {
       console.error('Failed to analyze skin tone:', error);
       throw error;
     }
+  }
+
+  /**
+   * Analyze both skin metrics and skin tone (single capture) for richer UI.
+   */
+  async analyzePhotoForSkinWithTone(imageBase64: string): Promise<SkinAnalysis | null> {
+    const [analysis, tone] = await Promise.all([
+      this.analyzePhotoForSkin(imageBase64),
+      this.analyzeSkinTone(imageBase64)
+    ]);
+
+    if (!analysis) return null;
+    if (tone) {
+      analysis.skinTone = {
+        hex: tone.hex,
+        name: tone.name,
+        category: tone.category as any
+      };
+    }
+    return analysis;
   }
 
   /**
@@ -1798,3 +1851,4 @@ constructor(private http: HttpClient) {}
     };
   }
 }
+

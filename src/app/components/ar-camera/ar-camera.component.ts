@@ -168,7 +168,7 @@ constructor(
       console.log('🔬 Starting analysis (this will take 3-5 seconds)...');
       
       // Analyze (takes 3-5 seconds)
-      this.skinAnalysis = await this.arService.analyzePhotoForSkin(base64);
+      this.skinAnalysis = await this.arService.analyzePhotoForSkinWithTone(base64);
       
       console.log('✅ Analysis complete:', this.skinAnalysis);
       console.log('📊 Texture:', this.skinAnalysis?.texture);

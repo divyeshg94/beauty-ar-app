@@ -12,13 +12,12 @@ export interface Product {
 }
 
 export type ProductCategory = 
-  | 'lipstick' 
-  | 'eyeshadow' 
-  | 'blush' 
-  | 'foundation' 
-  | 'mascara' 
-  | 'eyeliner'
-  | 'highlighter';
+| 'lipstick' 
+| 'eyeshadow' 
+| 'blush' 
+| 'foundation'
+| 'eyeliner'
+| 'highlighter';
 
 // Skin Analysis Models
 export interface SkinAnalysis {
