@@ -4,7 +4,7 @@
   "description": "AI Beauty Assistant with Real-Time AR - DeveloperWeek 2026 Hackathon",
   "scripts": {
     "ng": "ng",
-    "start": "ng serve",
+    "start": "npx serve -s dist/beauty-ar-assistant -l 8080",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
