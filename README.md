@@ -506,7 +506,7 @@ This project was created for the **DeveloperWeek Hackathon 2026** as a demonstra
 ## 📞 Support
 
 For issues, questions, or suggestions:
-- 📧 Email: [your-email@example.com]
+- 📧 Email: [divyeshgovardhanan@gmail.com]
 - 🐙 GitHub Issues: [Create an issue](https://github.com/divyeshg94/beauty-ar-app/issues)
 - 💬 Discussions: [Start a discussion](https://github.com/divyeshg94/beauty-ar-app/discussions)
 
