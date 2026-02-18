@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+﻿import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AiLookGeneratorService } from '../../services/ai-look-generator.service';
@@ -68,9 +68,15 @@ interface Toast {
       <div class="toast-container">
         <div *ngFor="let toast of toasts" [class]="'toast toast-' + toast.type">
           <div class="toast-content">
-            <span *ngIf="toast.type === 'success'" class="toast-icon">?</span>
-            <span *ngIf="toast.type === 'error'" class="toast-icon">?</span>
-            <span *ngIf="toast.type === 'info'" class="toast-icon">?</span>
+            <svg *ngIf="toast.type === 'success'" class="w-5 h-5 toast-icon" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+            </svg>
+            <svg *ngIf="toast.type === 'error'" class="w-5 h-5 toast-icon" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+            </svg>
+            <svg *ngIf="toast.type === 'info'" class="w-5 h-5 toast-icon" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
+            </svg>
             <span>{{ toast.message }}</span>
           </div>
         </div>
@@ -80,20 +86,29 @@ interface Toast {
       <div *ngIf="makeupResult" class="result-modal-overlay" (click)="closeResultModal()">
         <div class="result-modal" (click)="$event.stopPropagation()">
           <div class="result-header">
-            <h3>? Makeup Applied Successfully</h3>
-            <button class="close-btn" (click)="closeResultModal()">?</button>
+            <h3>✓ Makeup Applied Successfully</h3>
+            <button class="close-btn" (click)="closeResultModal()">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+            </button>
           </div>
 
           <div class="result-content">
             <!-- Result Image -->
             <div class="result-image-container">
-              <img [src]="makeupResult.url" alt="Makeup result" class="result-image">
+              <img #resultImage [src]="makeupResult.url" alt="Makeup result" class="result-image">
             </div>
 
             <!-- Applied Products List -->
             <div class="applied-products-section">
-              <h4>{{ makeupResult.appliedProducts?.length || 0 }} Products Applied</h4>
-              <div class="products-list">
+              <h4 *ngIf="makeupResult.appliedProducts && makeupResult.appliedProducts.length > 0">
+                {{ makeupResult.appliedProducts.length }} Products Applied
+              </h4>
+              <h4 *ngIf="!makeupResult.appliedProducts || makeupResult.appliedProducts.length === 0">
+                Product Applied
+              </h4>
+              <div class="products-list" *ngIf="makeupResult.appliedProducts && makeupResult.appliedProducts.length > 0">
                 <div *ngFor="let product of makeupResult.appliedProducts" class="product-item">
                   <div class="product-color" [style.background-color]="product.color"></div>
                   <div class="product-details">
@@ -105,7 +120,15 @@ interface Toast {
             </div>
           </div>
 
-          <button class="result-close-btn" (click)="closeResultModal()">Done</button>
+          <div class="result-actions">
+            <button class="download-btn" (click)="downloadResultImage()">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+              </svg>
+              Download
+            </button>
+            <button class="result-close-btn" (click)="closeResultModal()">Done</button>
+          </div>
         </div>
       </div>
   `,
@@ -213,32 +236,41 @@ interface Toast {
     }
 
     .result-modal-overlay {
-      @apply fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center;
+      @apply fixed inset-0 bg-black bg-opacity-50 z-[9999] flex items-center justify-center;
     }
 
     .result-modal {
-      @apply bg-gray-900 rounded-lg shadow-2xl border border-gray-700 max-w-md w-full mx-4 overflow-hidden;
+      @apply bg-gray-900 rounded-lg shadow-2xl border border-gray-700 max-w-xl w-full mx-4 overflow-hidden max-h-[90vh];
       animation: slideUp 0.3s ease-out;
+      display: flex;
+      flex-direction: column;
     }
 
     .result-header {
       @apply flex items-center justify-between px-6 py-4 border-b border-gray-700 bg-gray-800;
+      flex-shrink: 0;
     }
 
     .result-header h3 {
       @apply text-lg font-bold text-white m-0;
     }
 
+    .close-btn {
+      @apply text-gray-400 hover:text-white transition-colors duration-200 bg-none border-none cursor-pointer p-0;
+    }
+
     .result-content {
-      @apply p-6 space-y-4;
+      @apply p-6 space-y-4 overflow-y-auto;
+      flex: 1;
     }
 
     .result-image-container {
-      @apply rounded-lg overflow-hidden bg-gray-800;
+      @apply rounded-lg overflow-hidden bg-gray-800 flex-shrink-0;
+      max-height: 500px;
     }
 
     .result-image {
-      @apply w-full h-auto;
+      @apply w-full h-auto object-cover;
     }
 
     .applied-products-section {
@@ -250,7 +282,7 @@ interface Toast {
     }
 
     .products-list {
-      @apply space-y-2;
+      @apply space-y-2 max-h-[300px] overflow-y-auto;
     }
 
     .product-item {
@@ -276,6 +308,25 @@ interface Toast {
     .result-close-btn {
       @apply w-full px-6 py-3 bg-primary-500 hover:bg-primary-600 text-white font-semibold border-t border-gray-700 transition-all duration-300;
     }
+
+    .result-actions {
+      @apply flex gap-2 border-t border-gray-700 p-4 bg-gray-800;
+      flex-shrink: 0;
+    }
+
+    .download-btn {
+      @apply flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-lg transition-all duration-300;
+      @apply transform hover:scale-105 active:scale-95;
+
+      svg {
+        @apply w-5 h-5;
+      }
+    }
+
+    .result-close-btn {
+      @apply flex-1 px-4 py-3 bg-primary-500 hover:bg-primary-600 text-white font-semibold rounded-lg transition-all duration-300;
+      @apply transform hover:scale-105 active:scale-95 border-none;
+    }
   `]
 })
 export class AiLookGeneratorComponent {
@@ -292,11 +343,11 @@ makeupResult: MakeupVTOResult | null = null;
     private arService: PerfectCorpArService
   ) {
     // Subscribe to makeup results to display in modal
-    // Only show modal for batch operations (AI look generator with multiple products)
+    // Show modal for both batch operations and single products
     this.arService.makeupResult$.subscribe(result => {
-      if (result && result.appliedProducts && result.appliedProducts.length > 0) {
+      if (result?.url) {
         this.makeupResult = result;
-        console.log('?? Makeup result received with', result.appliedProducts.length, 'products');
+        console.log('✓ Makeup result received with', result.appliedProducts?.length || 1, 'product(s)');
       }
     });
   }
@@ -360,6 +411,26 @@ makeupResult: MakeupVTOResult | null = null;
   closeResultModal() {
     this.makeupResult = null;
   }
+
+  downloadResultImage() {
+    if (!this.makeupResult?.url) return;
+
+    try {
+      const link = document.createElement('a');
+      link.href = this.makeupResult.url;
+      link.download = `makeup-look-${new Date().getTime()}.jpg`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      this.showToast('Image downloaded successfully!', 'success');
+    } catch (error) {
+      console.error('Failed to download image:', error);
+      this.showToast('Failed to download image. Please try again.', 'error');
+    }
+  }
+
+
 
   private showToast(message: string, type: 'success' | 'error' | 'info') {
     const id = Math.random().toString(36).substr(2, 9);

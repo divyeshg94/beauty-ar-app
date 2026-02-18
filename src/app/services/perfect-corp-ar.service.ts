@@ -849,14 +849,16 @@ constructor(private http: HttpClient) {}
       const result = await this.pollMakeupVTOResult(response.data.task_id);
       console.log('✅ Makeup VTO result received:', result);
 
-      // Emit result to UI
+      // Emit result to UI with applied product
       if (result?.url) {
-        this.makeupResultSubject.next(result);
-        console.log('🖼️ Emitted makeup result URL:', result.url);
+        const resultWithProduct = {
+          ...result,
+          appliedProducts: [application],
+          productCount: 1
+        };
+        this.makeupResultSubject.next(resultWithProduct);
+        console.log('🖼️ Emitted makeup result with 1 product');
       }
-
-      // Update state with result and show popup with image
-      this.updateMakeupState(application, result?.url);
 
       return result;
 
