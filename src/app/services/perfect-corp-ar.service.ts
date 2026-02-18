@@ -146,6 +146,14 @@ interface ApiResponse {
   result?: any;
 }
 
+// Makeup Result with applied products
+export interface MakeupVTOResult {
+  url: string;
+  appliedProducts?: MakeupApplication[];
+  productCount?: number;
+  [key: string]: any;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -153,14 +161,14 @@ export class PerfectCorpArService {
 private arEngine: any = null;
 private faceDataSubject = new BehaviorSubject<FaceData | null>(null);
 private skinAnalysisSubject = new BehaviorSubject<SkinAnalysis | null>(null);
-private makeupResultSubject = new BehaviorSubject<{ url: string } | null>(null);
+private makeupResultSubject = new BehaviorSubject<MakeupVTOResult | null>(null);
 private isInitialized = false;
 private hasWarnedAboutRealtime = false; // Flag to show warning only once
 private videoElementProvider: (() => HTMLVideoElement | null) | null = null;
 
 public faceData$: Observable<FaceData | null> = this.faceDataSubject.asObservable();
 public skinAnalysis$: Observable<SkinAnalysis | null> = this.skinAnalysisSubject.asObservable();
-public makeupResult$: Observable<{ url: string } | null> = this.makeupResultSubject.asObservable();
+public makeupResult$: Observable<MakeupVTOResult | null> = this.makeupResultSubject.asObservable();
 
 private apiBaseUrl = environment.perfectCorpApiUrl;
 private apiKey = environment.perfectCorpApiKey;
@@ -855,6 +863,117 @@ constructor(private http: HttpClient) {}
     } catch (error) {
       console.error('❌ Failed to apply makeup VTO:', error);
       this.handleApiError(error, 'Makeup VTO API');
+      throw error;
+    }
+  }
+
+  /**
+   * Apply multiple makeup products in a single VTO operation
+   * This applies all products together in one image instead of creating multiple images
+   */
+  async applyMakeupBatch(applications: MakeupApplication[], cameraFrameBase64?: string): Promise<void> {
+    if (!this.isInitialized) {
+      throw new Error('AR Engine not initialized');
+    }
+
+    console.log('💄 Applying batch makeup VTO with', applications.length, 'products');
+
+    try {
+      // If no frame is provided, capture from the registered AR camera video element
+      if (!cameraFrameBase64 && this.videoElementProvider) {
+        const videoEl = this.videoElementProvider();
+        if (videoEl) {
+          cameraFrameBase64 = this.captureFrameAsBase64(videoEl);
+        }
+      }
+
+      // Upload the current frame (or fall back to YouCam sample image)
+      let srcFileId: string | null = null;
+      let srcFileUrl: string | null = null;
+      if (cameraFrameBase64) {
+        srcFileId = await this.uploadCameraFrameAndGetFileId(cameraFrameBase64);
+      } else {
+        srcFileUrl = 'https://plugins-media.makeupar.com/strapi/assets/sample_Image_1_202b6bf6e6.jpg';
+      }
+
+      // Map product category to YouCam category key
+      const categoryMap: { [key: string]: string } = {
+        'lipstick': 'lip_color',
+        'lip_liner': 'lip_liner',
+        'eyeshadow': 'eye_shadow',
+        'eyeliner': 'eye_liner',
+        'mascara': 'eyelashes',
+        'eyebrows': 'eyebrows',
+        'eyelashes': 'eyelashes',
+        'blush': 'blush',
+        'bronzer': 'bronzer',
+        'contour': 'contour',
+        'highlighter': 'highlighter',
+        'foundation': 'foundation',
+        'concealer': 'concealer',
+        'skin_smooth': 'skin_smooth'
+      };
+
+      // Build effects array with all products
+      const effects = applications.map(app => {
+        const youCamCategory = categoryMap[app.category] || app.category;
+        const intensity = Math.round((app.intensity || 0.8) * 100);
+        return this.buildEffectForCategory(youCamCategory, app.color, intensity, app.blend);
+      });
+
+      const vtoPayload: any = {
+        version: '1.0',
+        effects: effects
+      };
+
+      if (srcFileId) {
+        vtoPayload.src_file_id = srcFileId;
+      } else if (srcFileUrl) {
+        vtoPayload.src_file_url = srcFileUrl;
+      } else {
+        throw new Error('No source file provided for makeup VTO');
+      }
+
+      console.log('📤 Sending batch makeup VTO request with', effects.length, 'effects:', JSON.stringify(vtoPayload, null, 2));
+
+      // Step 1: Create makeup VTO task with all effects
+      const response = await this.http.post<YouCamTaskCreateResponse>(
+        `${this.apiBaseUrl}/task/makeup-vto`,
+        vtoPayload,
+        {
+          headers: {
+            'Authorization': `Bearer ${this.apiKey}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      ).toPromise();
+
+      if (!response?.data?.task_id) {
+        throw new Error('Failed to create makeup VTO task - No task_id in response');
+      }
+
+      console.log('✅ Batch makeup VTO task created, task_id:', response.data.task_id);
+
+      // Step 2: Poll for makeup VTO result
+      const result = await this.pollMakeupVTOResult(response.data.task_id);
+      console.log('✅ Batch makeup VTO result received:', result);
+
+      // Emit result to UI with all applied products
+      if (result?.url) {
+        const resultWithProducts = {
+          ...result,
+          appliedProducts: applications,
+          productCount: applications.length
+        };
+        this.makeupResultSubject.next(resultWithProducts);
+        console.log('🖼️ Emitted batch makeup result with', applications.length, 'products');
+      }
+
+      return result;
+
+    } catch (error) {
+      console.error('❌ Failed to apply batch makeup VTO:', error);
+      this.handleApiError(error, 'Batch Makeup VTO API');
       throw error;
     }
   }

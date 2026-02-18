@@ -32,22 +32,16 @@ export class AiLookGeneratorService {
   private getMockGeneratedLook(request: LookGenerationRequest): Observable<GeneratedLook> {
     const looks = this.getMockLooks();
     
-    // Simple matching based on prompt keywords
+    // Create a dynamic hash of the prompt to select a look
     const prompt = request.prompt.toLowerCase();
     
-    let selectedLook: GeneratedLook;
+    // Use hash-based selection for variety across all prompts
+    const hashCode = prompt.split('').reduce((acc, char) => ((acc << 5) - acc) + char.charCodeAt(0), 0);
+    const selectedLookIndex = Math.abs(hashCode) % looks.length;
     
-    if (prompt.includes('glam') || prompt.includes('evening')) {
-      selectedLook = looks[0]; // Glamorous Evening
-    } else if (prompt.includes('natural') || prompt.includes('day')) {
-      selectedLook = looks[1]; // Natural Day
-    } else if (prompt.includes('bold') || prompt.includes('dramatic')) {
-      selectedLook = looks[2]; // Bold & Dramatic
-    } else if (prompt.includes('work') || prompt.includes('professional')) {
-      selectedLook = looks[3]; // Professional Work
-    } else {
-      selectedLook = looks[0]; // Default
-    }
+    const selectedLook = looks[selectedLookIndex];
+    
+    console.log(`📍 Selected look index: ${selectedLookIndex} (${selectedLook.name}) for prompt: "${request.prompt}"`);
     
     return of(selectedLook);
   }
