@@ -6,6 +6,26 @@
     </svg>
   </button>
 
+  <!-- Header with Multi-Select Toggle -->
+  <div class="shelf-header">
+    <h3>Products</h3>
+    <div class="header-controls">
+      <span *ngIf="multiSelectMode && selectedProducts.size > 0" class="selection-counter">
+        {{ selectedProducts.size }} selected
+      </span>
+      <button 
+        class="multi-select-toggle"
+        [class.active]="multiSelectMode"
+        (click)="toggleMultiSelectMode()"
+        title="Toggle multi-select mode">
+        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h4a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zm0 6a1 1 0 011-1h4a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1v-2zm0 6a1 1 0 011-1h4a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1v-2zm6-11a1 1 0 00-1 1v2a1 1 0 001 1h4a1 1 0 001-1V4a1 1 0 00-1-1h-4zm0 6a1 1 0 00-1 1v2a1 1 0 001 1h4a1 1 0 001-1v-2a1 1 0 00-1-1h-4zm0 6a1 1 0 00-1 1v2a1 1 0 001 1h4a1 1 0 001-1v-2a1 1 0 00-1-1h-4z" clip-rule="evenodd"></path>
+        </svg>
+        <span>Multi-Select</span>
+      </button>
+    </div>
+  </div>
+
   <!-- Category Tabs -->
   <div class="category-tabs">
     <button 
@@ -23,17 +43,31 @@
       <p>{{ applyMessage || 'In progress…' }}</p>
     </div>
 
-    <div *ngIf="applyError" class="empty-state" style="color: #fca5a5;">
+    <div *ngIf="applyError" class="empty-state error-state">
       <p>{{ applyError }}</p>
     </div>
 
     <div 
       *ngFor="let product of products" 
       (click)="applyProduct(product)"
-      [style.pointer-events]="isApplying ? 'none' : 'auto'"
-      [style.opacity]="isApplying ? 0.6 : 1"
+      [style.pointer-events]="isApplying || isProductDisabled(product.id) ? 'none' : 'auto'"
+      [style.opacity]="isApplying ? 0.6 : (isProductDisabled(product.id) && multiSelectMode ? 0.4 : 1)"
       [class.applied]="isApplied(product.id)"
+      [class.selected]="isProductSelected(product.id)"
+      [class.disabled]="isProductDisabled(product.id) && multiSelectMode"
+      [class.multi-select-mode]="multiSelectMode"
       class="product-card">
+      
+      <!-- Selection Checkbox -->
+      <div *ngIf="multiSelectMode" class="product-checkbox">
+        <input 
+          type="checkbox" 
+          [checked]="isProductSelected(product.id)"
+          [disabled]="isProductDisabled(product.id)"
+          (click)="$event.stopPropagation()"
+          (change)="toggleProductSelection(product.id)">
+      </div>
+
       <div class="product-image">
         <div class="color-swatch" [style.background-color]="product.colorHex"></div>
         <div *ngIf="isApplied(product.id)" class="applied-checkmark">
@@ -54,6 +88,22 @@
     </div>
   </div>
 
-  
+  <!-- Apply Selected Button -->
+  <div *ngIf="multiSelectMode && selectedProducts.size > 0 && !isCollapsed" class="apply-selected-container">
+    <button 
+      class="apply-selected-btn"
+      (click)="applySelectedProducts()"
+      [disabled]="isApplying">
+      <span *ngIf="!isApplying">Apply {{ selectedProducts.size }} Selected</span>
+      <span *ngIf="isApplying" class="flex items-center justify-center gap-2">
+        <div class="spinner-sm"></div>
+        Applying...
+      </span>
+    </button>
+  </div>
 </div>
+
+
+
+
 
