@@ -157,11 +157,17 @@
         <!-- Overall Score -->
         <div class="overall-score">
           <div class="score-circle">
-            <div class="score-value">{{ skinAnalysis.overallScore || 85 }}</div>
+            <div class="score-value">{{ skinAnalysis.overallScore ?? '—' }}</div>
             <div class="score-label">Overall</div>
           </div>
           <div class="score-description">
-            <p>Your skin health score based on comprehensive analysis</p>
+            <p *ngIf="skinAnalysis.overallScore !== undefined && skinAnalysis.overallScore !== null">
+              {{ skinAnalysis.overallScore >= 80 ? 'Excellent skin health' : (skinAnalysis.overallScore >= 60 ? 'Good skin health' : 'Skin needs attention') }}
+              based on the captured photo.
+            </p>
+            <p *ngIf="skinAnalysis.overallScore === undefined || skinAnalysis.overallScore === null">
+              Overall score not available for this result.
+            </p>
           </div>
         </div>
 
@@ -174,8 +180,23 @@
           </div>
           <div class="skin-age-card">
             <strong>Skin Age</strong>
-            <p class="age-value">{{ skinAnalysis.skinAge || 30 }} years</p>
+            <p class="age-value">{{ skinAnalysis.skinAge ?? '—' }}<span *ngIf="skinAnalysis.skinAge !== undefined && skinAnalysis.skinAge !== null"> years</span></p>
             <p class="age-label">Apparent age</p>
+          </div>
+        </div>
+
+        <!-- Undertone -->
+        <div class="skin-info-grid" style="margin-top: 12px;">
+          <div class="skin-tone-card">
+            <strong>Undertone</strong>
+            <p class="tone-name" style="text-transform: capitalize;">{{ skinAnalysis.undertone }}</p>
+            <p class="age-label">
+              {{ skinAnalysis.undertone === 'warm' ? 'Golden/peach undertones' : (skinAnalysis.undertone === 'cool' ? 'Pink/rosy undertones' : 'Balanced undertones') }}
+            </p>
+          </div>
+          <div class="skin-age-card">
+            <strong>How to read scores</strong>
+            <p class="age-label">Higher % means healthier/cleaner detection for each metric.</p>
           </div>
         </div>
 
@@ -189,7 +210,9 @@
               <div class="metric-icon">🧴</div>
               <div class="metric-info">
                 <strong>Texture</strong>
-                <p class="metric-label">Surface smoothness</p>
+                <p class="metric-label">
+                  {{ skinAnalysis.texture >= 80 ? 'Smooth' : (skinAnalysis.texture >= 60 ? 'Normal' : 'Rough') }} surface texture
+                </p>
               </div>
               <div class="metric-score">
                 <span class="score">{{ skinAnalysis.texture }}%</span>
@@ -204,7 +227,9 @@
               <div class="metric-icon">🫧</div>
               <div class="metric-info">
                 <strong>Pores</strong>
-                <p class="metric-label">Pore visibility</p>
+                <p class="metric-label">
+                  {{ skinAnalysis.pores >= 80 ? 'Low visibility' : (skinAnalysis.pores >= 60 ? 'Moderate visibility' : 'High visibility') }}
+                </p>
               </div>
               <div class="metric-score">
                 <span class="score">{{ skinAnalysis.pores }}%</span>
@@ -219,7 +244,9 @@
               <div class="metric-icon">✨</div>
               <div class="metric-info">
                 <strong>Wrinkles</strong>
-                <p class="metric-label">Fine line detection</p>
+                <p class="metric-label">
+                  {{ skinAnalysis.wrinkles >= 80 ? 'Minimal lines' : (skinAnalysis.wrinkles >= 60 ? 'Some lines' : 'Visible lines') }}
+                </p>
               </div>
               <div class="metric-score">
                 <span class="score">{{ skinAnalysis.wrinkles }}%</span>
@@ -234,7 +261,9 @@
               <div class="metric-icon">🎯</div>
               <div class="metric-info">
                 <strong>Acne & Blemishes</strong>
-                <p class="metric-label">Blemish detection</p>
+                <p class="metric-label">
+                  {{ skinAnalysis.spots >= 80 ? 'Clear' : (skinAnalysis.spots >= 60 ? 'Mild' : 'Noticeable') }} blemishes
+                </p>
               </div>
               <div class="metric-score">
                 <span class="score">{{ skinAnalysis.spots }}%</span>
@@ -249,7 +278,9 @@
               <div class="metric-icon">💧</div>
               <div class="metric-info">
                 <strong>Hydration</strong>
-                <p class="metric-label">Moisture level</p>
+                <p class="metric-label">
+                  {{ skinAnalysis.hydration >= 80 ? 'Well hydrated' : (skinAnalysis.hydration >= 60 ? 'Normal hydration' : 'Dehydrated') }}
+                </p>
               </div>
               <div class="metric-score">
                 <span class="score">{{ skinAnalysis.hydration }}%</span>
