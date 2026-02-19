@@ -1,0 +1,277 @@
+﻿<div class="landing-page">
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="hero-background"></div>
+        <div class="hero-content">
+            <div class="hero-badge">
+                <span class="badge-icon">🏆</span>
+                <span>DeveloperWeek 2026 Hackathon</span>
+            </div>
+
+            <h1 class="hero-title">
+                Stop Guessing.<br />
+                <span class="gradient-text">Try Before You Buy.</span>
+            </h1>
+
+            <p class="hero-subtitle">
+                The frustration of buying makeup online ends now. Try any product on your face
+                instantly with AI-powered AR technology.
+            </p>
+
+            <div class="hero-cta">
+                <button (click)="scrollToDemo()" class="cta-primary">
+                    <span>Try It Now</span>
+                    <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                    </svg>
+                </button>
+                <button (click)="scrollToSection('how-it-works')" class="cta-secondary">
+                    <span>See How It Works</span>
+                </button>
+            </div>
+
+            <div class="hero-stats">
+                <div class="stat-pill">
+                    <span class="stat-icon">⚡</span>
+                    <span>Instant Results</span>
+                </div>
+                <div class="stat-pill">
+                    <span class="stat-icon">🎯</span>
+                    <span>100% Accurate Colors</span>
+                </div>
+                <div class="stat-pill">
+                    <span class="stat-icon">🆓</span>
+                    <span>Free to Try</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Scroll Indicator -->
+        <div class="scroll-indicator" (click)="scrollToSection('problem')">
+            <svg class="w-6 h-6 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
+            </svg>
+        </div>
+    </section>
+
+    <!-- Problem Section -->
+    <section id="problem" class="problem-section">
+        <div class="section-container">
+            <div class="section-header">
+                <span class="section-badge">The Problem</span>
+                <h2 class="section-title">Online Beauty Shopping is Broken</h2>
+                <p class="section-subtitle">
+                    Millions of people struggle to buy makeup online because they can't see how it looks on them
+                </p>
+            </div>
+
+            <!-- Statistics Grid -->
+            <div class="stats-grid">
+                <div *ngFor="let stat of statistics" class="stat-card">
+                    <div class="stat-value">{{ stat.value }}</div>
+                    <div class="stat-label">{{ stat.label }}</div>
+                    <div class="stat-description">{{ stat.description }}</div>
+                </div>
+            </div>
+
+            <!-- Problems Grid -->
+            <div class="problems-grid">
+                <div *ngFor="let problem of problems" class="problem-card">
+                    <div class="problem-icon">{{ problem.icon }}</div>
+                    <h3 class="problem-title">{{ problem.title }}</h3>
+                    <p class="problem-description">{{ problem.description }}</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Solution Section -->
+    <section class="solution-section">
+        <div class="section-container">
+            <div class="section-header">
+                <span class="section-badge gradient-bg">The Solution</span>
+                <h2 class="section-title">AI Beauty Assistant</h2>
+                <p class="section-subtitle">
+                    Powered by Perfect Corp's industry-leading AR and AI technology
+                </p>
+            </div>
+
+            <div class="solution-content">
+                <div class="solution-visual">
+                    <div class="phone-mockup">
+                        <div class="phone-screen">
+                            <div class="demo-placeholder">
+                                <div class="demo-camera"></div>
+                                <div class="demo-products"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="solution-text">
+                    <h3 class="solution-headline">Try Makeup in Real-Time</h3>
+                    <p class="solution-description">
+                        Our AI-powered platform lets you see exactly how any makeup product looks on
+                        your face before you buy. No more guessing, no more returns, no more frustration.
+                    </p>
+
+                    <div class="solution-benefits">
+                        <div class="benefit-item">
+                            <svg class="benefit-icon" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                            </svg>
+                            <span>Zero setup - works in your browser</span>
+                        </div>
+                        <div class="benefit-item">
+                            <svg class="benefit-icon" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                            </svg>
+                            <span>Instant results with live AR</span>
+                        </div>
+                        <div class="benefit-item">
+                            <svg class="benefit-icon" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                            </svg>
+                            <span>AI recommendations for your skin</span>
+                        </div>
+                        <div class="benefit-item">
+                            <svg class="benefit-icon" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                            </svg>
+                            <span>Generate complete looks with AI</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features-section">
+        <div class="section-container">
+            <div class="section-header">
+                <span class="section-badge">Features</span>
+                <h2 class="section-title">Everything You Need</h2>
+                <p class="section-subtitle">
+                    Powered by cutting-edge AI and AR technology
+                </p>
+            </div>
+
+            <div class="features-grid">
+                <div *ngFor="let feature of features" class="feature-card">
+                    <div class="feature-icon-wrapper bg-gradient-to-br {{ feature.color }}">
+                        <span class="feature-icon">{{ feature.icon }}</span>
+                    </div>
+                    <h3 class="feature-title">{{ feature.title }}</h3>
+                    <p class="feature-description">{{ feature.description }}</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section id="how-it-works" class="how-it-works-section">
+        <div class="section-container">
+            <div class="section-header">
+                <span class="section-badge gradient-bg">How It Works</span>
+                <h2 class="section-title">Try Makeup in 4 Simple Steps</h2>
+                <p class="section-subtitle">
+                    From camera to checkout in seconds
+                </p>
+            </div>
+
+            <div class="steps-container">
+                <div *ngFor="let step of howItWorks; let i = index" class="step-card">
+                    <div class="step-number">{{ step.step }}</div>
+                    <div class="step-icon">{{ step.icon }}</div>
+                    <h3 class="step-title">{{ step.title }}</h3>
+                    <p class="step-description">{{ step.description }}</p>
+                    <div *ngIf="i < howItWorks.length - 1" class="step-connector"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Technology Section -->
+    <section class="tech-section">
+        <div class="section-container">
+            <div class="tech-content">
+                <div class="tech-badge-group">
+                    <div class="tech-badge">
+                        <span class="tech-icon">🤖</span>
+                        <span>AI-Powered</span>
+                    </div>
+                    <div class="tech-badge">
+                        <span class="tech-icon">📱</span>
+                        <span>AR Technology</span>
+                    </div>
+                    <div class="tech-badge">
+                        <span class="tech-icon">⚡</span>
+                        <span>Real-Time</span>
+                    </div>
+                </div>
+
+                <h2 class="tech-title">Built with Perfect Corp's<br />Industry-Leading Technology</h2>
+                <p class="tech-description">
+                    Trusted by major beauty brands worldwide, Perfect Corp's AR and AI APIs
+                    power virtual try-on experiences for millions of users globally.
+                </p>
+
+                <div class="tech-stats-row">
+                    <div class="tech-stat">
+                        <div class="tech-stat-value">500M+</div>
+                        <div class="tech-stat-label">Users Worldwide</div>
+                    </div>
+                    <div class="tech-stat">
+                        <div class="tech-stat-value">98%</div>
+                        <div class="tech-stat-label">Accuracy Rate</div>
+                    </div>
+                    <div class="tech-stat">
+                        <div class="tech-stat-value">60fps</div>
+                        <div class="tech-stat-label">Real-Time AR</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="final-cta-section">
+        <div class="cta-container">
+            <div class="cta-content">
+                <h2 class="cta-title">Ready to Try?</h2>
+                <p class="cta-subtitle">
+                    See how makeup looks on you instantly. No signup required.
+                </p>
+                <button (click)="scrollToDemo()" class="cta-button">
+                    <span>Start Your Virtual Try-On</span>
+                    <svg class="w-6 h-6 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                    </svg>
+                </button>
+                <p class="cta-note">Works on any device with a camera</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-info">
+                <h3 class="footer-title">AI Beauty Assistant</h3>
+                <p class="footer-text">Built for DeveloperWeek 2026 Hackathon</p>
+                <p class="footer-text">Powered by Perfect Corp APIs</p>
+            </div>
+            <div class="footer-links">
+                <a href="https://github.com/divyeshg94/beauty-ar-app" target="_blank" class="footer-link">
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
+                    </svg>
+                    <span>GitHub</span>
+                </a>
+            </div>
+        </div>
+    </footer>
+
+</div>

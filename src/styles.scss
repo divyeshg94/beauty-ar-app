@@ -5,6 +5,10 @@
 
 /* Global Styles */
 @layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
   * {
     @apply box-border;
   }

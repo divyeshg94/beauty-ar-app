@@ -1,37 +1,27 @@
-<div class="app-container">
-  <!-- Welcome Screen -->
-  <div *ngIf="showWelcome" class="welcome-screen">
-    <div class="welcome-content">
-      <div class="logo-animation">
-        <svg class="w-24 h-24 text-primary-500" fill="currentColor" viewBox="0 0 20 20">
-          <path d="M10 2a8 8 0 100 16 8 8 0 000-16zM8 11a1 1 0 01-1-1V7a1 1 0 112 0v3a1 1 0 01-1 1zm4 0a1 1 0 01-1-1V7a1 1 0 112 0v3a1 1 0 01-1 1z"></path>
-        </svg>
-      </div>
-      <h1 class="text-3xl font-bold text-white mb-2">AI Beauty Assistant</h1>
-      <p class="text-gray-400 mb-6">Try makeup in real-time with AR</p>
-      <button (click)="dismissWelcome()" class="btn-primary">
-        Get Started
-      </button>
+<div class="app-container" [ngClass]="containerClass">
+    <!-- Welcome Screen -->
+    <div *ngIf="showLanding" class="landing-wrapper">
+        <app-landing-page></app-landing-page>
     </div>
-  </div>
 
-  <!-- Main App -->
-  <div *ngIf="!showWelcome" class="main-app">
-    <!-- AR Camera View -->
-    <app-ar-camera></app-ar-camera>
-    
-    <!-- Skin Analysis Overlay -->
-    <app-skin-analysis-overlay></app-skin-analysis-overlay>
-    
-    <!-- AI Look Generator -->
-    <app-ai-look-generator></app-ai-look-generator>
-    
-    <!-- Product Shelf -->
-    <app-product-shelf></app-product-shelf>
-  </div>
+    <!-- Main App -->
+    <div *ngIf="!showLanding" class="main-app">
+        <!-- AR Camera View -->
+        <app-ar-camera></app-ar-camera>
 
-  <!-- Top Header -->
-  <div *ngIf="!showWelcome" class="top-header">
-    <h2 class="text-xl font-bold col-lg-12" style="margin-left: 82vw">AI Beauty Assistant</h2>
-  </div>
+        <!-- Skin Analysis Overlay -->
+        <app-skin-analysis-overlay></app-skin-analysis-overlay>
+
+        <!-- AI Look Generator -->
+        <app-ai-look-generator></app-ai-look-generator>
+
+        <!-- Product Shelf -->
+        <app-product-shelf></app-product-shelf>
+    </div>
+
+    <!-- Top Header -->
+    <div *ngIf="!showLanding" class="top-header">
+        <button class="back-btn" (click)="backToLanding()">About</button>
+        <h2 class="top-title">AI Beauty Assistant</h2>
+    </div>
 </div>

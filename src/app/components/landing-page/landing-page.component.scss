@@ -1,0 +1,455 @@
+.landing-page {
+    @apply w-full;
+    scroll-behavior: smooth;
+    display: block;
+    overflow-x: hidden;
+}
+
+/* Hero Section */
+.hero-section {
+    @apply relative min-h-screen flex items-center justify-center overflow-hidden;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.hero-background {
+    @apply absolute inset-0;
+    background: radial-gradient(circle at 20% 50%, rgba(236, 72, 153, 0.3) 0%, transparent 50%), radial-gradient(circle at 80% 80%, rgba(59, 130, 246, 0.3) 0%, transparent 50%), radial-gradient(circle at 40% 20%, rgba(168, 85, 247, 0.3) 0%, transparent 50%);
+    animation: backgroundShift 20s ease infinite;
+}
+
+@keyframes backgroundShift {
+    0%, 100% {
+        transform: scale(1) rotate(0deg);
+    }
+
+    50% {
+        transform: scale(1.1) rotate(5deg);
+    }
+}
+
+.hero-content {
+    @apply relative z-10 max-w-4xl mx-auto px-6 text-center;
+    animation: fadeInUp 1s ease-out;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.hero-badge {
+    @apply inline-flex items-center gap-2 px-4 py-2 bg-white bg-opacity-20 backdrop-blur-lg rounded-full text-white text-sm font-medium mb-6;
+    animation: fadeIn 1s ease-out 0.2s backwards;
+}
+
+.badge-icon {
+    @apply text-xl;
+    animation: bounce 2s ease infinite;
+}
+
+.hero-title {
+    @apply text-5xl md:text-7xl font-bold text-white mb-6 leading-tight;
+    animation: fadeIn 1s ease-out 0.3s backwards;
+}
+
+.gradient-text {
+    @apply bg-gradient-to-r from-pink-200 via-purple-200 to-indigo-200 bg-clip-text text-transparent;
+}
+
+.hero-subtitle {
+    @apply text-xl md:text-2xl text-purple-100 mb-8 max-w-2xl mx-auto;
+    animation: fadeIn 1s ease-out 0.4s backwards;
+}
+
+.hero-cta {
+    @apply flex flex-col sm:flex-row items-center justify-center gap-4 mb-12;
+    animation: fadeIn 1s ease-out 0.5s backwards;
+}
+
+.cta-primary {
+    @apply flex items-center px-8 py-4 bg-white text-purple-600 font-bold rounded-full shadow-2xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300;
+}
+
+.cta-secondary {
+    @apply px-8 py-4 bg-transparent border-2 border-white text-white font-semibold rounded-full hover:bg-white hover:text-purple-600 transition-all duration-300;
+}
+
+.hero-stats {
+    @apply flex flex-wrap items-center justify-center gap-4;
+    animation: fadeIn 1s ease-out 0.6s backwards;
+}
+
+.stat-pill {
+    @apply flex items-center gap-2 px-4 py-2 bg-white bg-opacity-20 backdrop-blur-lg rounded-full text-white text-sm font-medium;
+}
+
+.stat-icon {
+    @apply text-lg;
+}
+
+.scroll-indicator {
+    @apply absolute bottom-8 left-1/2 transform -translate-x-1/2 text-white cursor-pointer opacity-70 hover:opacity-100 transition-opacity;
+    animation: fadeIn 1s ease-out 1s backwards;
+}
+
+/* Section Styles */
+.section-container {
+    @apply max-w-7xl mx-auto px-6 py-20;
+}
+
+.section-header {
+    @apply text-center mb-16;
+}
+
+.section-badge {
+    @apply inline-block px-4 py-2 bg-purple-100 text-purple-600 rounded-full text-sm font-semibold mb-4;
+
+    &.gradient-bg {
+        @apply bg-gradient-to-r from-purple-500 to-pink-500 text-white;
+    }
+}
+
+.section-title {
+    @apply text-4xl md:text-5xl font-bold text-gray-900 mb-4;
+}
+
+.section-subtitle {
+    @apply text-xl text-gray-600 max-w-2xl mx-auto;
+}
+
+/* Problem Section */
+.problem-section {
+    @apply bg-gray-50;
+}
+
+.stats-grid {
+    @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16;
+}
+
+.stat-card {
+    @apply bg-white rounded-2xl p-6 text-center shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300;
+}
+
+.stat-value {
+    @apply text-5xl font-bold text-purple-600 mb-2;
+}
+
+.stat-label {
+    @apply text-lg font-semibold text-gray-900 mb-2;
+}
+
+.stat-description {
+    @apply text-sm text-gray-600;
+}
+
+.problems-grid {
+    @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6;
+}
+
+.problem-card {
+    @apply bg-white rounded-2xl p-6 text-center hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300;
+}
+
+.problem-icon {
+    @apply text-5xl mb-4;
+}
+
+.problem-title {
+    @apply text-lg font-bold text-gray-900 mb-2;
+}
+
+.problem-description {
+    @apply text-sm text-gray-600;
+}
+
+/* Solution Section */
+.solution-section {
+    @apply bg-white;
+}
+
+.solution-content {
+    @apply grid grid-cols-1 lg:grid-cols-2 gap-12 items-center;
+}
+
+.solution-visual {
+    @apply flex justify-center;
+}
+
+.phone-mockup {
+    @apply relative w-64 h-auto;
+}
+
+.phone-screen {
+    @apply bg-gradient-to-br from-purple-500 to-pink-500 rounded-3xl shadow-2xl aspect-[9/19] overflow-hidden;
+}
+
+.demo-placeholder {
+    @apply w-full h-full p-4 flex flex-col gap-4;
+}
+
+.demo-camera {
+    @apply flex-1 bg-gray-800 bg-opacity-30 rounded-2xl backdrop-blur-sm;
+    animation: pulse 2s ease infinite;
+}
+
+.demo-products {
+    @apply h-24 bg-gray-800 bg-opacity-30 rounded-2xl backdrop-blur-sm;
+    animation: shimmer 2s ease infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 0.6;
+    }
+
+    50% {
+        opacity: 1;
+    }
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: -200% 0;
+    }
+
+    100% {
+        background-position: 200% 0;
+    }
+}
+
+.solution-text {
+    @apply space-y-6;
+}
+
+.solution-headline {
+    @apply text-3xl font-bold text-gray-900;
+}
+
+.solution-description {
+    @apply text-lg text-gray-600;
+}
+
+.solution-benefits {
+    @apply space-y-3;
+}
+
+.benefit-item {
+    @apply flex items-center gap-3 text-gray-700;
+}
+
+.benefit-icon {
+    @apply w-6 h-6 text-green-500 flex-shrink-0;
+}
+
+/* Features Section */
+.features-section {
+    @apply bg-gray-50;
+}
+
+.features-grid {
+    @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8;
+}
+
+.feature-card {
+    @apply bg-white rounded-2xl p-8 hover:shadow-xl transform hover:-translate-y-2 transition-all duration-300;
+}
+
+.feature-icon-wrapper {
+    @apply w-16 h-16 rounded-2xl flex items-center justify-center mb-4;
+}
+
+.feature-icon {
+    @apply text-3xl;
+}
+
+.feature-title {
+    @apply text-xl font-bold text-gray-900 mb-2;
+}
+
+.feature-description {
+    @apply text-gray-600;
+}
+
+/* How It Works Section */
+.how-it-works-section {
+    @apply bg-white;
+    scroll-behavior: auto;
+}
+
+.steps-container {
+    @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 relative;
+}
+
+.step-card {
+    @apply relative bg-gradient-to-br from-purple-50 to-pink-50 rounded-2xl p-8 text-center hover:shadow-xl transform hover:-translate-y-2 transition-all duration-300;
+}
+
+.step-number {
+    @apply absolute -top-4 left-1/2 transform -translate-x-1/2 w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-full flex items-center justify-center text-xl font-bold shadow-lg;
+}
+
+.step-icon {
+    @apply text-5xl mb-4 mt-4;
+}
+
+.step-title {
+    @apply text-xl font-bold text-gray-900 mb-2;
+}
+
+.step-description {
+    @apply text-gray-600;
+}
+
+.step-connector {
+    @apply hidden lg:block absolute top-1/2 -right-4 w-8 h-0.5 bg-gradient-to-r from-purple-300 to-pink-300;
+}
+
+/* Technology Section */
+.tech-section {
+    @apply bg-gradient-to-br from-purple-900 via-purple-800 to-pink-900 text-white;
+}
+
+.tech-content {
+    @apply text-center max-w-4xl mx-auto;
+}
+
+.tech-badge-group {
+    @apply flex flex-wrap items-center justify-center gap-4 mb-8;
+}
+
+.tech-badge {
+    @apply flex items-center gap-2 px-4 py-2 bg-white bg-opacity-20 backdrop-blur-lg rounded-full text-sm font-medium;
+}
+
+.tech-icon {
+    @apply text-xl;
+}
+
+.tech-title {
+    @apply text-4xl md:text-5xl font-bold mb-6;
+}
+
+.tech-description {
+    @apply text-xl text-purple-100 mb-12;
+}
+
+.tech-stats-row {
+    @apply grid grid-cols-1 md:grid-cols-3 gap-8;
+}
+
+.tech-stat {
+    @apply text-center;
+}
+
+.tech-stat-value {
+    @apply text-4xl font-bold mb-2;
+}
+
+.tech-stat-label {
+    @apply text-purple-200;
+}
+
+/* Final CTA Section */
+.final-cta-section {
+    @apply bg-gradient-to-r from-purple-600 to-pink-600 text-white py-20;
+}
+
+.cta-container {
+    @apply max-w-4xl mx-auto px-6 text-center;
+}
+
+.cta-content {
+    @apply space-y-6;
+}
+
+.cta-title {
+    @apply text-4xl md:text-5xl font-bold;
+}
+
+.cta-subtitle {
+    @apply text-xl text-purple-100;
+}
+
+.cta-button {
+    @apply inline-flex items-center px-12 py-5 bg-white text-purple-600 font-bold rounded-full text-lg shadow-2xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300;
+}
+
+.cta-note {
+    @apply text-sm text-purple-200;
+}
+
+/* Footer */
+.footer {
+    @apply bg-gray-900 text-gray-300 py-12;
+}
+
+.footer-content {
+    @apply max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-6;
+}
+
+.footer-info {
+    @apply text-center md:text-left;
+}
+
+.footer-title {
+    @apply text-xl font-bold text-white mb-2;
+}
+
+.footer-text {
+    @apply text-sm text-gray-400;
+}
+
+.footer-links {
+    @apply flex items-center gap-4;
+}
+
+.footer-link {
+    @apply flex items-center gap-2 text-gray-400 hover:text-white transition-colors;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .hero-title {
+        @apply text-4xl;
+    }
+
+    .hero-subtitle {
+        @apply text-lg;
+    }
+
+    .section-title {
+        @apply text-3xl;
+    }
+
+    .section-subtitle {
+        @apply text-lg;
+    }
+}
+
+/* Animation Classes */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes bounce {
+    0%, 100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-10px);
+    }
+}

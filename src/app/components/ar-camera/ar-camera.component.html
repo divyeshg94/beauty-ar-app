@@ -65,13 +65,6 @@
       <span *ngIf="isAnalyzing">Analyzing...</span>
     </button>
 
-    <button
-      class="action-btn capture"
-      (click)="capturePhoto()"
-      title="Capture">
-      Capture
-    </button>
-
     <button 
       *ngIf="hasMultipleCameras"
       (click)="switchCamera()" 

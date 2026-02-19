@@ -1,5 +1,20 @@
 .app-container {
-  @apply relative w-full h-screen overflow-hidden bg-gray-900;
+  @apply relative w-full bg-gray-900;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.app-container.show-landing {
+  height: 100vh;
+  overflow: hidden;
+}
+
+.landing-wrapper {
+  @apply w-full;
+  height: 100vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
 }
 
 .welcome-screen {
@@ -30,8 +45,23 @@
 }
 
 .top-header {
-  @apply absolute top-0 left-0 right-0 z-40 flex items-center justify-between px-4 py-3
-         bg-gradient-to-b from-gray-900 to-transparent;
+  @apply fixed top-0 left-0 right-0 z-[9999] flex items-center justify-center px-4 py-3
+         bg-gradient-to-b from-gray-900/95 to-transparent;
+  pointer-events: none;
+}
+
+.top-title {
+    @apply text-xl font-bold text-white;
+    pointer-events: none;
+    padding-left: 70%;
+}
+
+.back-btn {
+  @apply inline-flex items-center justify-center text-white px-3 py-2 rounded-lg bg-white/10 hover:bg-white/20 transition-colors duration-200;
+  position: absolute;
+  right: 1rem;
+  top: 0.75rem;
+  pointer-events: auto;
 }
 
 .settings-btn {
