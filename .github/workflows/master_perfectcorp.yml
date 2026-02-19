@@ -27,6 +27,19 @@ jobs:
         run: |
           npm ci
           npm run build
+          
+      - name: Verify build output
+        run: |
+          if [ ! -d "dist/beauty-ar-assistant" ]; then
+            echo "? Build failed: dist/beauty-ar-assistant not found"
+            exit 1
+          fi
+          if [ ! -f "dist/beauty-ar-assistant/index.html" ]; then
+            echo "? Build failed: index.html not found"
+            exit 1
+          fi
+          echo "? Build verification passed"
+          ls -la dist/beauty-ar-assistant
 
       - name: Prepare deployment package
         run: |
@@ -68,6 +81,4 @@ jobs:
           app-name: 'perfectcorp'
           slot-name: 'Production'
           package: .
-
-          
 
